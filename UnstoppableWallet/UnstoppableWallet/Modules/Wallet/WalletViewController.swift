@@ -58,6 +58,7 @@ class WalletViewController: ThemeViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("WalletViewController view did loaded")
 
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0

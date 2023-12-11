@@ -209,6 +209,8 @@ class App {
         let evmLabelStorage = EvmLabelStorage(dbPool: dbPool)
         let syncerStateStorage = SyncerStateStorage(dbPool: dbPool)
         evmLabelManager = EvmLabelManager(provider: hsLabelProvider, storage: evmLabelStorage, syncerStateStorage: syncerStateStorage)
+      
+      let safeCoinKitManager = SafeCoinKitManager()
 
         let adapterFactory = AdapterFactory(
             evmBlockchainManager: evmBlockchainManager,
@@ -218,7 +220,8 @@ class App {
             tronKitManager: tronKitManager,
             restoreSettingsManager: restoreSettingsManager,
             coinManager: coinManager,
-            evmLabelManager: evmLabelManager
+            evmLabelManager: evmLabelManager,
+            safeCoinKitManager: safeCoinKitManager
         )
         adapterManager = AdapterManager(
             adapterFactory: adapterFactory,

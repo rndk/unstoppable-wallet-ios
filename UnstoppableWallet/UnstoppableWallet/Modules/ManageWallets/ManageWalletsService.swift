@@ -80,12 +80,14 @@ class ManageWalletsService {
 
                 return tokens.filter { account.type.supports(token: $0) }
             } else {
+              print("ManageWalletsService fetch 3")
                 let allFullCoins = try marketKit.fullCoins(filter: filter, limit: 100)
                 let tokens = allFullCoins.map { $0.tokens }.flatMap { $0 }
 
                 return tokens.filter { account.type.supports(token: $0) }
             }
         } catch {
+          print("ManageWalletsService fetch error")
             return []
         }
     }

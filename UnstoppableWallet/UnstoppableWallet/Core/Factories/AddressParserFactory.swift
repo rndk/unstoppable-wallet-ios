@@ -110,6 +110,8 @@ class AddressParserFactory {
             return addressParserChain
         case .solana: return AddressParserChain()
         case .unsupported: return AddressParserChain()
+        case .safeCoin: return AddressParserChain()
+        case .sui: return AddressParserChain()
         }
 
     }

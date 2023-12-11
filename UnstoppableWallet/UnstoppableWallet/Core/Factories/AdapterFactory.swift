@@ -13,9 +13,10 @@ class AdapterFactory {
     private let restoreSettingsManager: RestoreSettingsManager
     private let coinManager: CoinManager
     private let evmLabelManager: EvmLabelManager
+    private let safeCoinKitManager: SafeCoinKitManager
 
     init(evmBlockchainManager: EvmBlockchainManager, evmSyncSourceManager: EvmSyncSourceManager, binanceKitManager: BinanceKitManager, btcBlockchainManager: BtcBlockchainManager, tronKitManager: TronKitManager,
-         restoreSettingsManager: RestoreSettingsManager, coinManager: CoinManager, evmLabelManager: EvmLabelManager) {
+         restoreSettingsManager: RestoreSettingsManager, coinManager: CoinManager, evmLabelManager: EvmLabelManager, safeCoinKitManager: SafeCoinKitManager) {
         self.evmBlockchainManager = evmBlockchainManager
         self.evmSyncSourceManager = evmSyncSourceManager
         self.binanceKitManager = binanceKitManager
@@ -24,6 +25,7 @@ class AdapterFactory {
         self.restoreSettingsManager = restoreSettingsManager
         self.coinManager = coinManager
         self.evmLabelManager = evmLabelManager
+        self.safeCoinKitManager = safeCoinKitManager
     }
 
     private func evmAdapter(wallet: Wallet) -> IAdapter? {
@@ -66,6 +68,20 @@ class AdapterFactory {
 
         return try? Trc20Adapter(tronKitWrapper: tronKitWrapper, contractAddress: address, wallet: wallet)
     }
+  
+    private func suiAdapter(wallet: Wallet) -> IAdapter? {
+        return nil
+    }
+  
+    private func safeCoinAdapter(wallet: Wallet) -> IAdapter? {
+        print(">>> safeCoinAdapter()... \(wallet)") //TODO remove
+        guard let safeCoinKitWrapper = try? safeCoinKitManager.safeCoinKit(account: wallet.account, blockChainType: .safeCoin) else {
+            print(">>> safeCoinAdapter() error -> return nil...") //TODO remove
+            return nil
+        }
+        
+        return SafeCoinAdapter(safeCoinKitWrapper: safeCoinKitWrapper)
+    }
 
 }
 
@@ -92,8 +108,19 @@ extension AdapterFactory {
 
         return nil
     }
+  
+    func suiTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
+      return nil //TODO
+    }
+  
+    func safeCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
+      return nil //TODO
+    }
 
     func adapter(wallet: Wallet) -> IAdapter? {
+//      print(">>> adapter(wallet) >>> \(wallet.token.type) - \(wallet.token.blockchain.type)") //TODO remove
+      print(">>> adapter wallet >>> \(wallet.account)") //TODO remove
+      
         switch (wallet.token.type, wallet.token.blockchain.type) {
 
         case (.derived, .bitcoin):
@@ -137,6 +164,13 @@ extension AdapterFactory {
 
         case (.eip20(let address), .tron):
             return trc20Adapter(address: address, wallet: wallet)
+          
+        case (.native, .sui):
+            return suiAdapter(wallet: wallet)
+          
+//        case (.native, .safeCoin):
+        case (_, .safeCoin):
+            return safeCoinAdapter(wallet: wallet)
 
         default: ()
         }

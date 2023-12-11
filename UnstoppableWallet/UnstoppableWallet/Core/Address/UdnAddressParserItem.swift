@@ -104,6 +104,8 @@ extension UdnAddressParserItem {
         case .fantom: return "ETH"
         case .tron: return "TRX"
         case .solana: return "SOL"
+        case .safeCoin: return "SAFE"
+        case .sui: return "SUI"
         case .unsupported(let uid): return uid
         }
     }

@@ -8,6 +8,7 @@ import UIKit
 
 struct WalletModule {
     static func viewController() -> UIViewController {
+        print("WalletModule viewController()") //REMOVE
         let coinPriceService = WalletCoinPriceService(
             tag: "wallet",
             currencyKit: App.shared.currencyKit,

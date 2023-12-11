@@ -20,7 +20,9 @@ extension BlockchainType {
         .fantom,
         .binanceSmartChain,
         .binanceChain,
-        .tron
+        .tron,
+        .sui,
+        .safeCoin
     ]
 
     func placeholderImageName(tokenProtocol: TokenProtocol?) -> String {
@@ -47,20 +49,22 @@ extension BlockchainType {
         switch self {
         case .bitcoin: return 1
         case .ethereum: return 2
-        case .binanceSmartChain: return 3
-        case .tron: return 4
-        case .polygon: return 5
-        case .avalanche: return 6
-        case .zcash: return 7
-        case .bitcoinCash: return 8
-        case .ecash: return 9
-        case .litecoin: return 10
-        case .dash: return 11
-        case .binanceChain: return 12
-        case .gnosis: return 13
-        case .fantom: return 14
-        case .arbitrumOne: return 15
-        case .optimism: return 16
+        case .safeCoin: return 3
+        case .sui: return 4
+        case .binanceSmartChain: return 5
+        case .tron: return 6
+        case .polygon: return 7
+        case .avalanche: return 8
+        case .zcash: return 9
+        case .bitcoinCash: return 10
+        case .ecash: return 11
+        case .litecoin: return 12
+        case .dash: return 13
+        case .binanceChain: return 14
+        case .gnosis: return 15
+        case .fantom: return 16
+        case .arbitrumOne: return 17
+        case .optimism: return 18
         default: return Int.max
         }
     }
@@ -142,6 +146,8 @@ extension BlockchainType {
         case .litecoin: return "LTC (BIP44, BIP49, BIP84, BIP86)"
         case .binanceChain: return "BNB, BEP2 tokens"
         case .tron: return "TRX, TRC20 tokens"
+        case .sui: return "SUI DESC" //TODO
+        case .safeCoin: return "SAFECOIN DESC" //TODO
         default: return ""
         }
     }

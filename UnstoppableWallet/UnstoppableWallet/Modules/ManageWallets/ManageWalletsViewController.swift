@@ -32,6 +32,7 @@ class ManageWalletsViewController: ThemeSearchViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+      print("ManageWalletsVC view did load...")
 
         title = "manage_wallets.title".localized
         navigationItem.searchController?.searchBar.placeholder = "manage_wallets.search_placeholder".localized
@@ -98,6 +99,7 @@ class ManageWalletsViewController: ThemeSearchViewController {
     }
 
     private func onUpdate(viewItems: [ManageWalletsViewModel.ViewItem]) {
+//      print("ManageWalletsVC onUpdate() items: \(viewItems)")
         let animated = self.viewItems.map { $0.uid } == viewItems.map { $0.uid }
         self.viewItems = viewItems
 

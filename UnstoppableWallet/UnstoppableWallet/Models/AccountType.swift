@@ -58,6 +58,9 @@ enum AccountType {
     }
 
     func supports(token: Token) -> Bool {
+      if (token.coin.uid.contains("sui") || token.coin.uid.contains("safe-coin")) {
+        print("AccountType supports \(token)")
+      }
         switch self {
         case .mnemonic:
             switch (token.blockchainType, token.type) {
@@ -77,6 +80,8 @@ enum AccountType {
             case (.arbitrumOne, .native), (.arbitrumOne, .eip20): return true
             case (.optimism, .native), (.optimism, .eip20): return true
             case (.tron, .native), (.tron, .eip20): return true
+            case (.sui, _): return true
+            case (.safeCoin, _): return true
             default: return false
             }
         case let .hdExtendedKey(key):
@@ -106,6 +111,8 @@ enum AccountType {
             case (.fantom, .native), (.fantom, .eip20): return true
             case (.arbitrumOne, .native), (.arbitrumOne, .eip20): return true
             case (.optimism, .native), (.optimism, .eip20): return true
+            case (.sui, _): return true
+            case (.safeCoin, _): return true
             default: return false
             }
         case .tronAddress:
@@ -354,4 +361,14 @@ extension AccountType {
 
         return accountType
     }
+}
+
+extension AccountType {
+  public func getWords() -> [String]? {
+    switch self {
+    case .mnemonic(words: let words, salt: _, bip39Compliant: _):
+      return words
+    default : return nil
+    }
+  }
 }
