@@ -19,7 +19,7 @@ class SafeCoinKitManager {
     }
     
     let words = account.type.getWords()
-    let der = try DerivationPathKeyPair(seed: seed, words: words!)//TODO!!!!!!!!!!!!!!!!!!!!!
+    let der = try DerivableKeyPair(seed: seed, words: words!)//TODO!!!!!!!!!!!!!!!!!!!!!
     
     let signer = SafeCoinSigner(pair: der)
     let address: String = signer.address()
@@ -28,6 +28,7 @@ class SafeCoinKitManager {
     print(">>> addre: \(address), words:\(String(describing: words))")
     
     let safeCoinKit = try SafeCoinKit.instance(
+      signer: signer,
       address: address,
       network: network,
       walletId: account.id
@@ -54,13 +55,23 @@ class SafeCoinKitWrapper {
     self.safeCoinKit = safeCoinKit
   }
   
-  //  func send(contract: Contract, feeLimit: Int?) async throws {
-  //      guard let signer = signer else {
-  //          throw SignerError.signerNotSupported
-  //      }
-  //
-  //      return try await tronKit.send(contract: contract, signer: signer, feeLimit: feeLimit)
-  //  }
+//    func send(contract: Contract, feeLimit: Int?) async throws {
+//        guard let signer = signer else {
+//            throw SignerError.signerNotSupported
+//        }
+//  
+//        return try await tronKit.send(contract: contract, signer: signer, feeLimit: feeLimit)
+//    }
+  
+  func send(preparedTransaction: DerivablePreparedTransaction) async throws {
+    try await self.safeCoinKit.send(transaction: preparedTransaction)
+  }
+  
+  func refresh() {
+    safeCoinKit.refresh()
+  }
+  
+
 }
 
 extension SafeCoinKitManager {

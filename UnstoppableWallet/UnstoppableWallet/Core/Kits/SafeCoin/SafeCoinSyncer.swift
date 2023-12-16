@@ -50,6 +50,8 @@ extension SafeCoinSyncer {
   
   func stop() {
     //TODO tasks cancel?
+    tasks.forEach({t in t.cancel()})
+    tasks.removeAll()
   }
   
   func refresh() {
@@ -59,6 +61,9 @@ extension SafeCoinSyncer {
     //        case .notReady:
     //            syncTimer.start()
     //        }
+    if !state.syncing {
+      sync()
+    }
   }
   
   func sync() {
@@ -74,7 +79,6 @@ extension SafeCoinSyncer {
         let balance = try await safeCoinGridProvider.getBalance(address: address)
         accountInfoManager.handle(newBalance: balance)
         print(">>> saef coien blance: \(balance)")
-        //TODO ост тут - походу вернулась старая проблема когда decimals не грузятся почемуто
         
         let lastTransactionHash = transactionManager.getLastTransaction()?.hash
         

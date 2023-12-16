@@ -4,6 +4,7 @@ import BigInt
 import Combine
 
 public class SafeCoinKit {
+  private let signer: SafeCoinSigner
   private let syncer: SafeCoinSyncer
   private let accountInfoManager: SafeCoinAccountInfoManager
   private let transactionManager: SafeCoinTransactionManager
@@ -23,7 +24,8 @@ public class SafeCoinKit {
     transactionManager: SafeCoinTransactionManager,
     transactionSender: SafeCoinTransactionSender,
     feeProvider: SafeCoinFeeProvider,
-    rpcSourceStorage: SafeCoinRpcSourceStorage
+    rpcSourceStorage: SafeCoinRpcSourceStorage,
+    signer: SafeCoinSigner
   ) {
     self.address = address
     self.network = network
@@ -33,6 +35,7 @@ public class SafeCoinKit {
     self.syncer = syncer
     self.feeProvider = feeProvider
     self.rpcSourceStorage = rpcSourceStorage
+    self.signer = signer
   }
 }
 
@@ -49,6 +52,10 @@ extension SafeCoinKit {
   //    public var accountActive: Bool {
   //        accountInfoManager.accountActive
   //    }
+  
+  public var safeCoinSigner: SafeCoinSigner {
+    self.signer
+  }
   
   public var receiveAddress: String {
     self.address
@@ -82,7 +89,10 @@ extension SafeCoinKit {
   //        transactionManager.fullTransactions(tagQueries: tagQueries, fromHash: fromHash, limit: limit)
   //    }
   
-  public func estimateFee(to: String, sendAmount: BigUInt) async throws -> BigUInt {
+  public func estimateFee(
+    to: String,
+    sendAmount: BigUInt
+  ) async throws -> DerivablePreparedTransaction {
     try await feeProvider.estimateFee(
       to: to,
       sendAmount: sendAmount,
@@ -115,9 +125,26 @@ extension SafeCoinKit {
   //        let newTransaction = try await transactionSender.sendTransaction(contract: contract, signer: signer, feeLimit: feeLimit)
   //        transactionManager.handle(newTransaction: newTransaction)
   //    }
-  public func send(address: String, amount: BigUInt) async throws {
-    let fee = try await estimateFee(to: address, sendAmount: amount)
-    let newTransaction = try await transactionSender.sendTransaction(to: address, amount: amount, fee: fee)
+  
+//  public func send(address: String, amount: BigUInt) async throws {
+//    let fee = try await estimateFee(to: address, sendAmount: amount)
+//    let newTransaction = try await transactionSender.sendTransaction(
+//      to: address,
+//      amount: amount,
+//      fee: BigUInt(fee.expectedFee.total)
+//    )
+//    transactionManager.handle(/*newTransaction: newTransaction*/)
+//  }
+  
+//  public func send(transaction: String) async throws {
+//    let transactionId = try await transactionSender.sendTransaction(transaction: transaction)
+//    print(">>> SafeCoinKit send transaction, answer transactionId: \(transactionId)")
+//    transactionManager.handle(/*newTransaction: newTransaction*/)
+//  }
+  
+  public func send(transaction: DerivablePreparedTransaction) async throws {
+    let transactionId = try await transactionSender.sendTransaction(transaction: transaction)
+    print(">>> SafeCoinKit send transaction, answer transactionId: \(transactionId)")
     transactionManager.handle(/*newTransaction: newTransaction*/)
   }
   
@@ -156,6 +183,7 @@ extension SafeCoinKit {
   //    }
   
   public static func instance(
+    signer: SafeCoinSigner,
     address: String,
     network: SafeCoinNetwork,
     walletId: String,
@@ -181,16 +209,20 @@ extension SafeCoinKit {
     
     let networkManager = NetworkManager(logger: logger)
     
-    let tronGridProvider = SafeCoinGridProvider(baseUrl: provideUrl(network: network), networkManager: networkManager)
-    let feeProvider = SafeCoinFeeProvider(safeCoinGridProvider: tronGridProvider)
+    let safeCoinGridProvider = SafeCoinGridProvider(
+      baseUrl: provideUrl(network: network),
+      networkManager: networkManager,
+      safeCoinSigner: signer
+    )
+    let feeProvider = SafeCoinFeeProvider(safeCoinGridProvider: safeCoinGridProvider)
     
     let syncer = SafeCoinSyncer(
       accountInfoManager: accountInfoManager,
       transactionManager: transactionManager,
-      safeCoinGridProvider: tronGridProvider,
+      safeCoinGridProvider: safeCoinGridProvider,
       address: address
     )
-    let transactionSender = SafeCoinTransactionSender(safeCoinGridProvider: tronGridProvider)
+    let transactionSender = SafeCoinTransactionSender(safeCoinGridProvider: safeCoinGridProvider)
     
     let kit = SafeCoinKit(
       address: address,
@@ -200,7 +232,8 @@ extension SafeCoinKit {
       transactionManager: transactionManager,
       transactionSender: transactionSender,
       feeProvider: feeProvider,
-      rpcSourceStorage: rpcSourceStorage
+      rpcSourceStorage: rpcSourceStorage,
+      signer: signer
     )
     
     return kit

@@ -61,6 +61,20 @@ extension SafeCoinAdapter: IBalanceAdapter {
            return self?.balanceData(balance: $0) ?? BalanceData(available: 0)
         }
     }
+  
+}
+
+extension SafeCoinAdapter: ISendSafeCoinAdapter {
+  func validate(address: String) throws {
+    //TODO validate address
+  }
+  func sendTransaction(trx: String) {
+    //TODO send transaction
+  }
+  var availableBalance: Decimal {
+    //TODO balance to Decimals
+    0
+  }
 }
 
 //extension BaseTronAdapter: IDepositAdapter {

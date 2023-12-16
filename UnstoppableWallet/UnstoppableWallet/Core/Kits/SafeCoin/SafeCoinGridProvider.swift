@@ -8,16 +8,32 @@ class SafeCoinGridProvider {
   private let baseUrl: String
   private let networkManager: NetworkManager
   private let apiClient: JSONRPCAPIClient
+  private let blockchainClient: BlockchainClient
+  private let safeCoinSigner: SafeCoinSigner
   
   private let headers: HTTPHeaders
   private var currentRpcId = 0
   private let pageLimit = 1000
   
-  init(baseUrl: String, networkManager: NetworkManager) {
+  init(
+    baseUrl: String,
+    networkManager: NetworkManager,
+    safeCoinSigner: SafeCoinSigner
+  ) {
     self.baseUrl = baseUrl
     self.networkManager = networkManager
+    self.safeCoinSigner = safeCoinSigner
     self.apiClient = JSONRPCAPIClient(endpoint: baseUrl)
+    
     self.headers = HTTPHeaders()
+    
+    self.blockchainClient = BlockchainClient(
+      apiClient: self.apiClient,
+      systemProgrammId: SafeCoinTokenProgram.systemProgramId,
+      tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
+      associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
+      sysvarRent: SafeCoinTokenProgram.sysvarRent
+    )
   }
   
 }
@@ -135,6 +151,24 @@ extension SafeCoinGridProvider {
       result.append(acc.pubkey)
     }
     return result
+  }
+  
+  func estimateFee(to: String, amount: UInt64) async throws -> DerivablePreparedTransaction {
+    let preparedTransaction = try await blockchainClient.prepareSendingNative(
+      from: safeCoinSigner.addressKeyPair(),
+      to: to,
+      amount: amount
+    )
+    print(">>> SafeCoinGripProvider estimeteFee: \(preparedTransaction)")
+    return preparedTransaction
+  }
+  
+  func sendTransaction(transaction: String) async throws -> TransactionID {
+    try await apiClient.sendTransaction(transaction: transaction)
+  }
+  
+  func sendTransaction(transaction: DerivablePreparedTransaction) async throws -> String {
+    try await blockchainClient.sendTransaction(preparedTransaction: transaction)
   }
   
 }

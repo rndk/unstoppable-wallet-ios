@@ -11,8 +11,16 @@ class SafeCoinTransactionSender {
 
 extension SafeCoinTransactionSender {
   
-  func sendTransaction(to: String, amount: BigUInt, fee: BigUInt) async throws -> SafeCoinTransaction? {
-    nil //TODO рассчитать газ, а затем, если все норм, выполнить транзакцию
+//  func sendTransaction(
+//    transaction: String
+//  ) async throws -> TransactionID {
+//    try await safeCoinGridProvider.sendTransaction(transaction: transaction)
+//  }
+  
+  func sendTransaction(
+    transaction: DerivablePreparedTransaction
+  ) async throws -> String {
+    try await safeCoinGridProvider.sendTransaction(transaction: transaction)
   }
   
 }

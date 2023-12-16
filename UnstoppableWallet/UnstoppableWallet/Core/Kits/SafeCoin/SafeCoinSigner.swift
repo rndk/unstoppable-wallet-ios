@@ -8,10 +8,10 @@ import TweetNacl
 import CommonCrypto
 
 
-class SafeCoinSigner {
-  private let keyPair: DerivationPathKeyPair
+public class SafeCoinSigner {
+  private let keyPair: DerivableKeyPair
   
-  init(pair: DerivationPathKeyPair) {
+  init(pair: DerivableKeyPair) {
     self.keyPair = pair
   }
   
@@ -24,6 +24,10 @@ extension SafeCoinSigner {
   
   public func address() -> String {
     keyPair.publicKey.base58EncodedString
+  }
+  
+  public func addressKeyPair() -> DerivableKeyPair {
+    self.keyPair
   }
   
 }

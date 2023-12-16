@@ -116,6 +116,12 @@ protocol ISendZcashAdapter {
     func recipient(from stringEncodedAddress: String) -> Recipient?
 }
 
+protocol ISendSafeCoinAdapter {
+  func validate(address: String) throws
+  var availableBalance: Decimal { get }
+  func sendTransaction(trx: String) /*-> Single<Void>*/
+}
+
 // Nft Adapters
 
 protocol INftAdapter: AnyObject {

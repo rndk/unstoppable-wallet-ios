@@ -11,8 +11,13 @@ class SafeCoinFeeProvider {
 
 extension SafeCoinFeeProvider {
   
-  func estimateFee(to: String, sendAmount: BigUInt, currentAmount: BigUInt) async throws -> BigUInt {
-    BigUInt(0) //TODO дернуть расчет газа на основе того сколько хочешь отправить и сколько вообще есть
+  func estimateFee(
+    to: String,
+    sendAmount: BigUInt,
+    currentAmount: BigUInt
+  ) async throws -> DerivablePreparedTransaction {
+    //todo передать все параметры наверное надо
+    return try await safeCoinGridProvider.estimateFee(to: to, amount: UInt64(sendAmount))
   }
   
 }
