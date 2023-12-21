@@ -16,7 +16,7 @@ class BaseSafeCoinAdapter {
   }
   
   var isMainNet: Bool {
-    kit.network == .mainNet
+    kit.isMainNet()
   }
   
   func convertToAdapterState(safeCoinSyncState: SafeCoinSyncState) -> AdapterState {
@@ -25,14 +25,6 @@ class BaseSafeCoinAdapter {
     case .notSynced(let error): return .notSynced(error: error.convertedError)
     case .syncing: return .syncing(progress: nil, lastBlockDate: nil)
     }
-  }
-  
-  open var explorerTitle: String {
-    fatalError("Must be overridden by subclass")
-  }
-  
-  open func explorerUrl(transactionHash: String) -> String? {
-    fatalError("Must be overridden by subclass")
   }
   
   func balanceDecimal(kitBalance: BigUInt?, decimals: Int) -> Decimal {

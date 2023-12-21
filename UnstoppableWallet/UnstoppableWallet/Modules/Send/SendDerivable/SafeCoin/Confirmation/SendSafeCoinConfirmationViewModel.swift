@@ -51,7 +51,6 @@ class SendSafeCoinConfirmationViewModel {
   private func sync(state: SendSafeCoinConfirmationService.State) {
     switch state {
     case .ready(let fee):
-      //feesRelay.accept(feeItems(fees: fees))
       feesRelay.accept(feeItems(fee: BigUInt(fee.expectedFee.total)))
       sendEnabledRelay.accept(true)
       cautionsRelay.accept([])
@@ -285,7 +284,6 @@ class SendSafeCoinConfirmationViewModel {
   }
   
   private func sendBaseCoinItems(
-    //to: TronKit.Address,
     to: Address,
     value: BigUInt
   ) -> [SectionViewItem] {

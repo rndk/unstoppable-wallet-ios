@@ -74,10 +74,20 @@ class SendSafeCoinConfirmationService {
       let preparedTransaction: DerivablePreparedTransaction
       
       do {
-        preparedTransaction = try await safeCoinKit.estimateFee(
-          to: sendData.addressData.safeCoinAddress.raw,
-          sendAmount: sendData.sendAmount
-        )
+        if safeCoinKit.balance(contractAddress: safeCoinKit.address) == self?.sendData.sendAmount {
+          // если нажал "отправить все", то вычисляем цену ренты аккаунта и уменьшаем отправляемую сумму?
+          let minRent = try await safeCoinKit.calcMinRent()
+          
+          preparedTransaction = try await safeCoinKit.prepareTransaction(
+            to: sendData.addressData.safeCoinAddress.raw,
+            sendAmount: sendData.sendAmount - minRent
+          )
+        } else {
+          preparedTransaction = try await safeCoinKit.prepareTransaction(
+            to: sendData.addressData.safeCoinAddress.raw,
+            sendAmount: sendData.sendAmount
+          )
+        }
       } catch {
         self?.feeState = .failed(error)
         self?.state = .notReady(errors: [error])
@@ -174,6 +184,10 @@ extension SendSafeCoinConfirmationService {
     sendAdressActiveRelay.asObservable()
   }
   
+  func getSendData() -> SendSafeCoinService.SendData {
+    return self.sendData
+  }
+  
   func send() {
     guard case .ready(let preparedTransaction) = state, case .completed(_) = feeState else {
       return
@@ -202,16 +216,8 @@ extension SendSafeCoinConfirmationService {
 }
 
 extension SendSafeCoinConfirmationService {
-  func getSendData() -> SendSafeCoinService.SendData {
-    return self.sendData
-  }
-}
-
-extension SendSafeCoinConfirmationService {
   
   enum State {
-    //case ready(fees: [Fee])
-//    case ready(fee: BigUInt)
     case ready(preparedTransaction: DerivablePreparedTransaction)
     case notReady(errors: [Error])
   }

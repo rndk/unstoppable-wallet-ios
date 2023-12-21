@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import MarketKit
 
 class SafeCoinTransactionManager {
   private let userAddress: String
@@ -19,7 +20,35 @@ extension SafeCoinTransactionManager {
     transactionsSubject.eraseToAnyPublisher()
   }
   
-  func allTransactions()/* -> [SafeCoinTransaction]*/ {
+  func transactionsPublisher(
+    token: MarketKit.Token?,
+    filter: TransactionTypeFilter
+  ) -> AnyPublisher<[SafeCoinTransaction], Never> {
+    switch filter {
+    case .incoming: incomingTransactions()
+    case .outgoing: outgoingTransactions()
+    default: allTransactions()
+    }
+    return transactionsPublisher
+  }
+  
+  func transactions(
+    from: TransactionRecord?,
+    token: MarketKit.Token?,
+    filter: TransactionTypeFilter,
+    limit: Int
+  ) -> [SafeCoinTransaction] {
+    //coinUid - обработать позже
+    return storage.transactions(
+      address: self.userAddress,
+      coinUid: "",
+      fromHash: from?.transactionHash,
+      filter: filter,
+      limit: limit
+    )
+  }
+  
+  func allTransactions() {
     let allTransactions = storage.allTransactions(address: self.userAddress)
     transactionsSubject.send(allTransactions)
   }

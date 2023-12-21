@@ -39,28 +39,25 @@ extension SafeCoinAdapter: IAdapter {
 }
 
 extension SafeCoinAdapter: IBalanceAdapter {
-    var balanceState: AdapterState {
-      convertToAdapterState(safeCoinSyncState: kit.syncState)
+  var balanceState: AdapterState {
+    convertToAdapterState(safeCoinSyncState: kit.syncState)
+  }
+  
+  var balanceStateUpdatedObservable: Observable<AdapterState> {
+    kit.syncStatePublisher.asObservable().map { [weak self] in
+      self?.convertToAdapterState(safeCoinSyncState: $0) ?? .syncing(progress: nil, lastBlockDate: nil)
     }
-
-    var balanceStateUpdatedObservable: Observable<AdapterState> {
-        kit.syncStatePublisher.asObservable().map { [weak self] in
-            self?.convertToAdapterState(safeCoinSyncState: $0) ?? .syncing(progress: nil, lastBlockDate: nil)
-        }
+  }
+  
+  var balanceData: BalanceData {
+    balanceData(balance: kit.balance(contractAddress: kit.address))
+  }
+  
+  var balanceDataUpdatedObservable: Observable<BalanceData> {
+    kit.balancePublisher.asObservable().map { [weak self] in
+      return self?.balanceData(balance: $0) ?? BalanceData(available: 0)
     }
-
-    var balanceData: BalanceData {
-      let baldata = balanceData(balance: kit.balance(contractAddress: kit.address)) //TODO
-      print(">>> SafeCoinAdapter balanceData:\(baldata.balanceTotal)")
-      return baldata
-    }
-
-    var balanceDataUpdatedObservable: Observable<BalanceData> {
-        kit.balancePublisher.asObservable().map { [weak self] in
-          print(">>> SafeCoinAdapter balanceDataUpdatedObservable:\($0)")
-           return self?.balanceData(balance: $0) ?? BalanceData(available: 0)
-        }
-    }
+  }
   
 }
 
@@ -76,12 +73,3 @@ extension SafeCoinAdapter: ISendSafeCoinAdapter {
     0
   }
 }
-
-//extension BaseTronAdapter: IDepositAdapter {
-//    var receiveAddress: DepositAddress {
-//        ActivatedDepositAddress(
-//            receiveAddress: tronKit.receiveAddress.base58,
-//            isActive: tronKit.accountActive
-//        )
-//    }
-//}

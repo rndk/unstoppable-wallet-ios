@@ -11,13 +11,18 @@ class SafeCoinFeeProvider {
 
 extension SafeCoinFeeProvider {
   
-  func estimateFee(
+  func prepareTransaction(
     to: String,
     sendAmount: BigUInt,
     currentAmount: BigUInt
   ) async throws -> DerivablePreparedTransaction {
-    //todo передать все параметры наверное надо
-    return try await safeCoinGridProvider.estimateFee(to: to, amount: UInt64(sendAmount))
+    return try await safeCoinGridProvider.prepareTransaction(
+      to: to, amount: UInt64(sendAmount)
+    )
+  }
+  
+  func calcMinRent() async throws -> BigUInt {
+    return try await safeCoinGridProvider.calcMinRent()
   }
   
 }

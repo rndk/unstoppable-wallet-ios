@@ -6,6 +6,7 @@ class BlockchainSettingsStorage {
     private let keyBtcRestore = "btc-restore"
     private let keyBtcTransactionSort = "btc-transaction-sort"
     private let keyEvmSyncSource = "evm-sync-source"
+    private let keyDerivableSyncSource = "derivable-sync-source"
 
     init(storage: BlockchainSettingRecordStorage) {
         self.storage = storage
@@ -47,5 +48,18 @@ extension BlockchainSettingsStorage {
         let record = BlockchainSettingRecord(blockchainUid: blockchainType.uid, key: keyEvmSyncSource, value: evmSyncSourceUrl)
         try? storage.save(record: record)
     }
+  
+  func derivableSyncSourceUrl(blockchainType: BlockchainType) -> String? {
+      try? storage.record(blockchainUid: blockchainType.uid, key: keyDerivableSyncSource).flatMap { $0.value }
+  }
+
+  func save(derivableSyncSourceUrl: String, blockchainType: BlockchainType) {
+      let record = BlockchainSettingRecord(
+        blockchainUid: blockchainType.uid,
+        key: keyDerivableSyncSource,
+        value: derivableSyncSourceUrl
+      )
+      try? storage.save(record: record)
+  }
 
 }

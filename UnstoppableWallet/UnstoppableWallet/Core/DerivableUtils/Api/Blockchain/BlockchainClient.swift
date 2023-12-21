@@ -54,7 +54,7 @@ public class BlockchainClient: DerivableBlockchainClient {
     } else {
       let (lps, minRentExemption) = try await (
         apiClient.getFees(commitment: nil).feeCalculator?.lamportsPerSignature,
-        apiClient.getMinimumBalanceForRentExemption(span: 165) //TODO 165?
+        apiClient.getMinimumBalanceForRentExemption(span: 165)
       )
       let lamportsPerSignature = lps ?? 5000
       feeCalculator = DefaultFeeCalculator(
@@ -88,7 +88,8 @@ public class BlockchainClient: DerivableBlockchainClient {
     from account: DerivableKeyPair,
     to destination: String,
     amount: UInt64,
-    feePayer: PublicKey? = nil
+    feePayer: PublicKey? = nil,
+    sendMax: Bool = false
   ) async throws -> DerivablePreparedTransaction {
     let feePayer = feePayer ?? account.publicKey
     let fromPublicKey = account.publicKey
@@ -98,9 +99,7 @@ public class BlockchainClient: DerivableBlockchainClient {
     var accountInfo: BufferInfo<EmptyInfo>?
     do {
       accountInfo = try await apiClient.getAccountInfo(account: destination)
-      //guard accountInfo == nil || accountInfo?.owner == SystemProgram.id.base58EncodedString
-      guard accountInfo == nil || accountInfo?.owner == self.systemProgrammId.base58EncodedString //TODO ?????
-//      guard accountInfo == nil || accountInfo?.owner == self.systemProgrammId //TODO ?????
+      guard accountInfo == nil || accountInfo?.owner == self.systemProgrammId.base58EncodedString
       else { throw BlockchainClientError.invalidAccountInfo }
     } catch let error as APIClientError where error == .couldNotRetrieveAccountInfo {
       // ignoring error
@@ -111,7 +110,7 @@ public class BlockchainClient: DerivableBlockchainClient {
     
     // form instruction
     let instruction = try SystemProgram.transferInstruction(
-      id: self.systemProgrammId, //TODO ???????
+      id: self.systemProgrammId,
       from: fromPublicKey,
       to: PublicKey(string: destination),
       lamports: amount

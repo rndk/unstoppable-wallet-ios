@@ -4,12 +4,42 @@ import RxSwift
 import RxRelay
 
 class SafeCoinKitManager {
+  private let syncSourceManager: DerivableBlockchainManager
   private let disposeBag = DisposeBag()
   private var currentAccount: Account?
   private weak var _safeCoinKitWrapper: SafeCoinKitWrapper?
   private let queue = DispatchQueue(label: "\(AppConfig.label).safe-coin-kit-manager", qos: .userInitiated)
+  private let safeCoinKitUpdatedRelay = PublishRelay<Void>()
   
-  private func _safeCoinKitWrapper(account: Account, blockchainType: BlockchainType) throws -> SafeCoinKitWrapper {
+  init(syncSourceManager: DerivableBlockchainManager) {
+    self.syncSourceManager = syncSourceManager
+    
+    subscribe(disposeBag, syncSourceManager.syncSourceObservable) { [weak self] blockchainType in
+        self?.handleUpdatedSyncSource(blockchainType: blockchainType)
+    }
+  }
+  
+  private func handleUpdatedSyncSource(blockchainType: BlockchainType) {
+    queue.sync {
+      guard let _safeCoinKitWrapper = _safeCoinKitWrapper else {
+        return
+      }
+      
+      guard _safeCoinKitWrapper.blockchainType == blockchainType else {
+        return
+      }
+      
+      self._safeCoinKitWrapper?.safeCoinKit.updateNetwork(
+        source: syncSourceManager.syncSource(blockchainType: blockchainType).link
+      )
+      self._safeCoinKitWrapper?.safeCoinKit.refresh()
+    }
+  }
+  
+  private func _safeCoinKitWrapper(
+    account: Account,
+    blockchainType: BlockchainType
+  ) throws -> SafeCoinKitWrapper {
     if let _safeCoinKitWrapper = _safeCoinKitWrapper, let currentAccount = currentAccount, currentAccount == account {
       return _safeCoinKitWrapper
     }
@@ -19,22 +49,21 @@ class SafeCoinKitManager {
     }
     
     let words = account.type.getWords()
-    let der = try DerivableKeyPair(seed: seed, words: words!)//TODO!!!!!!!!!!!!!!!!!!!!!
+    let der = try DerivableKeyPair(seed: seed, words: words!)
     
     let signer = SafeCoinSigner(pair: der)
     let address: String = signer.address()
     
-    let network: SafeCoinNetwork = .testNet //TODO network?
-    print(">>> addre: \(address), words:\(String(describing: words))")
+    let networkUrl = self.syncSourceManager.syncSource(blockchainType: .safeCoin).link
     
     let safeCoinKit = try SafeCoinKit.instance(
       signer: signer,
       address: address,
-      network: network,
+      networkUrl: networkUrl,
       walletId: account.id
     )
     
-    safeCoinKit.start() //TODO or refresh?
+    safeCoinKit.start()
     
     let wrapper = SafeCoinKitWrapper(blockchainType: blockchainType, safeCoinKit: safeCoinKit)
     
@@ -55,14 +84,6 @@ class SafeCoinKitWrapper {
     self.safeCoinKit = safeCoinKit
   }
   
-//    func send(contract: Contract, feeLimit: Int?) async throws {
-//        guard let signer = signer else {
-//            throw SignerError.signerNotSupported
-//        }
-//  
-//        return try await tronKit.send(contract: contract, signer: signer, feeLimit: feeLimit)
-//    }
-  
   func send(preparedTransaction: DerivablePreparedTransaction) async throws {
     try await self.safeCoinKit.send(transaction: preparedTransaction)
   }
@@ -71,7 +92,6 @@ class SafeCoinKitWrapper {
     safeCoinKit.refresh()
   }
   
-
 }
 
 extension SafeCoinKitManager {

@@ -70,6 +70,7 @@ class AdapterFactory {
     }
   
     private func suiAdapter(wallet: Wallet) -> IAdapter? {
+        //TODO
         return nil
     }
   
@@ -110,17 +111,19 @@ extension AdapterFactory {
     }
   
     func suiTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      return nil //TODO
+      // TODO
+      return nil
     }
   
     func safeCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      return nil //TODO
+      if let safeCoinKitWrapper = safeCoinKitManager.safeCoinKit {
+        print(">>> AdapterFactory return non nil SafeCoinTransactionsAdapter")
+        return SafeCoinTransactionsAdapter(safeCoinKitWrapper: safeCoinKitWrapper)
+      }
+      return nil
     }
 
     func adapter(wallet: Wallet) -> IAdapter? {
-//      print(">>> adapter(wallet) >>> \(wallet.token.type) - \(wallet.token.blockchain.type)") //TODO remove
-      print(">>> adapter wallet >>> \(wallet.account)") //TODO remove
-      
         switch (wallet.token.type, wallet.token.blockchain.type) {
 
         case (.derived, .bitcoin):

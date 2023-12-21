@@ -39,7 +39,12 @@ class SendSafeCoinService {
   
   private let activeAddressRelay = PublishRelay<Bool>()
   
-  init(token: Token, mode: SendBaseService.Mode, adapter: SafeCoinAdapter, addressService: AddressService) {
+  init(
+    token: Token,
+    mode: SendBaseService.Mode,
+    adapter: SafeCoinAdapter,
+    addressService: AddressService
+  ) {
     sendToken = token
     self.mode = mode
     self.adapter = adapter
@@ -83,7 +88,7 @@ class SendSafeCoinService {
   }
   
   private func validSafeCoinAmount(amount: Decimal) throws -> BigUInt {
-    guard let tronAmount = BigUInt(amount.hs.roundedString(decimal: sendToken.decimals)) else {
+    guard let safeCoinAmount = BigUInt(amount.hs.roundedString(decimal: sendToken.decimals)) else {
       throw AmountError.invalidDecimal
     }
     
@@ -91,7 +96,7 @@ class SendSafeCoinService {
       throw AmountError.insufficientBalance
     }
     
-    return tronAmount
+    return safeCoinAmount
   }
   
 }
@@ -238,7 +243,11 @@ extension SendSafeCoinService {
   
   struct SendData {
     let addressData: SendSafeCoinService.AddressData
-    let sendAmount: BigUInt
+    var sendAmount: BigUInt
+    
+    mutating func updateAmount(newAmount: BigUInt) {
+      self.sendAmount = newAmount
+    }
   }
   
 }

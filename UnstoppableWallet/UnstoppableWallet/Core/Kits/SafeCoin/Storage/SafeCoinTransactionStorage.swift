@@ -90,4 +90,135 @@ extension SafeCoinTransactionStorage {
     }
   }
   
+  func transactions(
+    address: String,
+    coinUid: String,
+    fromHash: String?,
+    filter: TransactionTypeFilter,
+    limit: Int?
+  ) -> [SafeCoinTransaction] {
+    switch filter {
+    case .all: return allTransactions(address: address)
+    case .incoming: do {
+      if fromHash != nil, limit != nil {
+        return incomingTransactions(address: address, fromHash: fromHash!, limit: limit!)
+      } else if fromHash != nil {
+        return incomingTransactions(address: address, fromHash: fromHash!)
+      } else {
+        return incomingTransactions(address: address)
+      }
+    }
+    case .outgoing: do {
+      if fromHash != nil, limit != nil {
+        return outgoingTransactions(address: address, fromHash: fromHash!, limit: limit!)
+      } else if fromHash != nil {
+        return outgoingTransactions(address: address, fromHash: fromHash!)
+      } else {
+        return outgoingTransactions(address: address)
+      }
+    }
+    default: return allTransactions(address: address)
+    }
+  }
+  
+  private func incomingTransactions(address: String, fromHash: String) -> [SafeCoinTransaction] {
+    try! dbPool.read { db in
+      
+      let transaction = try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.to == address
+          && SafeCoinTransaction.Columns.hash == fromHash
+        )
+        .fetchOne(db)
+      
+      guard let trans = transaction else {
+        return []
+      }
+      
+      return try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.to == address
+          && SafeCoinTransaction.Columns.blockTime > trans.blockTime
+        )
+        .fetchAll(db)
+    }
+  }
+  
+  private func incomingTransactions(address: String, fromHash: String, limit: Int) -> [SafeCoinTransaction] {
+    try! dbPool.read { db in
+      
+      let transaction = try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.to == address
+          && SafeCoinTransaction.Columns.hash == fromHash
+        )
+        .fetchOne(db)
+      
+      guard let trans = transaction else {
+        return []
+      }
+      
+      return try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.to == address
+          && SafeCoinTransaction.Columns.blockTime > trans.blockTime
+        )
+        .limit(limit)
+        .fetchAll(db)
+    }
+  }
+  
+  private func outgoingTransactions(address: String, fromHash: String) -> [SafeCoinTransaction] {
+    try! dbPool.read { db in
+      let transaction = try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.from == address
+          && SafeCoinTransaction.Columns.hash == fromHash
+        )
+        .fetchOne(db)
+      
+      guard let trans = transaction else {
+        return []
+      }
+      
+      return try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.from == address
+          && SafeCoinTransaction.Columns.blockTime > trans.blockTime
+        )
+        .fetchAll(db)
+    }
+  }
+  
+  private func outgoingTransactions(address: String, fromHash: String, limit: Int) -> [SafeCoinTransaction] {
+    try! dbPool.read { db in
+      let transaction = try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.from == address
+          && SafeCoinTransaction.Columns.hash == fromHash
+        )
+        .fetchOne(db)
+      
+      guard let trans = transaction else {
+        return []
+      }
+      
+      return try SafeCoinTransaction
+        .filter(
+          SafeCoinTransaction.Columns.currentAddress == address
+          && SafeCoinTransaction.Columns.from == address
+          && SafeCoinTransaction.Columns.blockTime > trans.blockTime
+        )
+        .limit(limit)
+        .fetchAll(db)
+    }
+  }
+  
 }

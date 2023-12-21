@@ -1,7 +1,6 @@
 import Foundation
 import HsExtensions
 
-//TODO тут надо запрашивать баланс и транзакции
 class SafeCoinSyncer {
   
   private var tasks = Set<AnyTask>()
@@ -9,23 +8,28 @@ class SafeCoinSyncer {
   private let accountInfoManager: SafeCoinAccountInfoManager
   private let transactionManager: SafeCoinTransactionManager
   private let safeCoinGridProvider: SafeCoinGridProvider
+  private let storage: DerivableCoinSyncerStorage
   private var address: String = ""
   
   private var syncing: Bool = false
   
-  @DistinctPublished private(set) var state: SafeCoinSyncState =
-    .notSynced(error: SafeCoinSyncState.SyncError.notStarted)
+  @DistinctPublished private(set) var state: SafeCoinSyncState = .notSynced(error: SafeCoinSyncState.SyncError.notStarted)
+  @DistinctPublished private(set) var lastBlockHeight: Int = 0
   
   init(
     accountInfoManager: SafeCoinAccountInfoManager,
     transactionManager: SafeCoinTransactionManager,
     safeCoinGridProvider: SafeCoinGridProvider,
+    syncerStorage: DerivableCoinSyncerStorage,
     address: String
   ) {
     self.accountInfoManager = accountInfoManager
     self.transactionManager = transactionManager
     self.safeCoinGridProvider = safeCoinGridProvider
+    self.storage = syncerStorage
     self.address = address
+    
+    lastBlockHeight = Int(storage.lastBlockHeight(address: address, coinUid: "safe-coin-2"))
   }
   
   private func set(state: SafeCoinSyncState) {
@@ -34,6 +38,10 @@ class SafeCoinSyncer {
     if case .syncing = state {} else {
       syncing = false
     }
+  }
+  
+  func updateGridProviderNetwork(source: String) {
+    self.safeCoinGridProvider.updateBaseUrl(newSourceUrl: source)
   }
   
 }
@@ -68,7 +76,7 @@ extension SafeCoinSyncer {
   
   func sync() {
     print(">>> SafeCoinSyncer sync() start...")
-    Task { [weak self, safeCoinGridProvider, address, transactionManager, accountInfoManager] in
+    Task { [weak self, safeCoinGridProvider, address, transactionManager, accountInfoManager, storage] in
       do {
         guard let syncer = self, !syncer.syncing else {
           return
@@ -80,21 +88,30 @@ extension SafeCoinSyncer {
         accountInfoManager.handle(newBalance: balance)
         print(">>> saef coien blance: \(balance)")
         
-        let lastTransactionHash = transactionManager.getLastTransaction()?.hash
+        //todo blockHeight
+        let newLastBlockHeight = try await safeCoinGridProvider.getLastBlockHeight()
+        if self?.lastBlockHeight != Int(newLastBlockHeight) {
+          storage.save(address: address, coinUid: "safe_coin_2", blockHeight: newLastBlockHeight)
+          self?.lastBlockHeight = Int(newLastBlockHeight)
+          print(">>> newLastBlockHeight: \(newLastBlockHeight)")
+        }
         
-//        let rpcSignatureInfos = try await self?.getSignaturesFromRpcNode(
-//          lastTransactionHash: lastTransactionHash
-//        )
-//        print(">>> rpcSignaturesInfo: \(rpcSignaturesInfo?.count)")
+        let lastTransactionHash = transactionManager.getLastTransaction()?.hash
+        print(">>> las transaction hash: \(lastTransactionHash)")
+        
+        //let rpcSignatureInfos = try await self?.getSignaturesFromRpcNode(
+        //  lastTransactionHash: lastTransactionHash
+        //)
+        //print(">>> rpcSignaturesInfo: \(rpcSignaturesInfo?.count)")
         let safeTransfers = try await safeCoinGridProvider.safeTransfers(address: address)
         let splTransfers = try await safeCoinGridProvider.splTransfers(address: address)
         let safeRpcExportedTxs = (safeTransfers + splTransfers).sorted(by: {$0.blockTime < $1.blockTime })
         
-//        let tokenAccounts = try await self?.getTokenAccounts()
-//        let mintAccounts = self?.getMintAccounts(tokenAccounts.map { $0.mintAddress })
+        //let tokenAccounts = try await self?.getTokenAccounts()
+        //let mintAccounts = self?.getMintAccounts(tokenAccounts.map { $0.mintAddress })
         print(">>> SafeCoinSyncer transactions: \(safeRpcExportedTxs)")
         
-//        let transactions =
+        //let transactions =
         //TODO короч тут минт эти штуки надо сделать как в андроиде
         transactionManager.save(transactions: safeRpcExportedTxs, replaceOnConflict: true)
         

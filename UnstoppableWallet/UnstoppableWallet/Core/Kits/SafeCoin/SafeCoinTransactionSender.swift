@@ -11,12 +11,6 @@ class SafeCoinTransactionSender {
 
 extension SafeCoinTransactionSender {
   
-//  func sendTransaction(
-//    transaction: String
-//  ) async throws -> TransactionID {
-//    try await safeCoinGridProvider.sendTransaction(transaction: transaction)
-//  }
-  
   func sendTransaction(
     transaction: DerivablePreparedTransaction
   ) async throws -> String {

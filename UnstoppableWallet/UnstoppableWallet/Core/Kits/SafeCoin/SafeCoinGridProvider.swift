@@ -5,7 +5,7 @@ import HsToolKit
 
 class SafeCoinGridProvider {
   
-  private let baseUrl: String
+  private var baseUrl: String
   private let networkManager: NetworkManager
   private let apiClient: JSONRPCAPIClient
   private let blockchainClient: BlockchainClient
@@ -51,12 +51,21 @@ extension SafeCoinGridProvider {
 
 extension SafeCoinGridProvider {
   
+  func updateBaseUrl(newSourceUrl: String) {
+    self.baseUrl = newSourceUrl
+    self.apiClient.updateEndpoint(newEndpoint: newSourceUrl)
+  }
+  
   var source: String {
     baseUrl
   }
   
   func getBalance(address: String) async throws -> UInt64 {
     return try await apiClient.getBalance(account: address)
+  }
+  
+  func getLastBlockHeight() async throws -> UInt64 {
+    try await apiClient.getBlockHeight()
   }
   
   func getSignaturesForAddress(
@@ -70,7 +79,10 @@ extension SafeCoinGridProvider {
   }
   
   func safeTransfers(address: String) async throws -> [SafeCoinTransaction] {
-    let signaturesInfos = try await apiClient.getSignaturesForAddress(address: address)
+    print(">>> SafeCoinGridProvider safeTransfers address: \(address)")
+    let signaturesInfos = try await apiClient.getSignaturesForAddress(
+      address: address, configs: RequestConfiguration(limit: pageLimit)
+    )
     var result: [SafeCoinTransaction] = []
     for signatureInfo in signaturesInfos {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
@@ -153,7 +165,7 @@ extension SafeCoinGridProvider {
     return result
   }
   
-  func estimateFee(to: String, amount: UInt64) async throws -> DerivablePreparedTransaction {
+  func prepareTransaction(to: String, amount: UInt64) async throws -> DerivablePreparedTransaction {
     let preparedTransaction = try await blockchainClient.prepareSendingNative(
       from: safeCoinSigner.addressKeyPair(),
       to: to,
@@ -169,6 +181,10 @@ extension SafeCoinGridProvider {
   
   func sendTransaction(transaction: DerivablePreparedTransaction) async throws -> String {
     try await blockchainClient.sendTransaction(preparedTransaction: transaction)
+  }
+  
+  func calcMinRent() async throws -> BigUInt {
+    return BigUInt(try await apiClient.getMinimumBalanceForRentExemption(span: 165))
   }
   
 }

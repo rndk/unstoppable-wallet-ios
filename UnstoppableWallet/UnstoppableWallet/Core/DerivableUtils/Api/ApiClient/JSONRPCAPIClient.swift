@@ -7,7 +7,7 @@ public class JSONRPCAPIClient: DerivationApiClient {
   
   // MARK: -
   
-  public let endpoint: String
+  public var endpoint: String
   private let networkManager: DerivationNetworkManager
   
   public init(
@@ -16,6 +16,10 @@ public class JSONRPCAPIClient: DerivationApiClient {
   ) {
     self.endpoint = endpoint
     self.networkManager = networkManager
+  }
+  
+  func updateEndpoint(newEndpoint: String) {
+    self.endpoint = newEndpoint
   }
   
   // MARK: -
@@ -337,8 +341,9 @@ public class JSONRPCAPIClient: DerivationApiClient {
     address: String,
     configs: RequestConfiguration? = nil
   ) async throws -> [DerivableSignatureInfo] {
+    //TODO method: "getSignaturesForAddress", - официальное название, а второе - это что дергает наш эксплорер
     try await get(
-      method: "getSignaturesForAddress",
+      method: "getConfirmedSignaturesForAddress2",
       params: [address, configs]
     )
   }

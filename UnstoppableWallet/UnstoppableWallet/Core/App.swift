@@ -65,6 +65,7 @@ class App {
     let feeRateProviderFactory: FeeRateProviderFactory
 
     let evmSyncSourceManager: EvmSyncSourceManager
+    let derivableSyncSourceManager: DerivableBlockchainManager
     let evmAccountRestoreStateManager: EvmAccountRestoreStateManager
     let evmBlockchainManager: EvmBlockchainManager
     let binanceKitManager: BinanceKitManager
@@ -210,7 +211,14 @@ class App {
         let syncerStateStorage = SyncerStateStorage(dbPool: dbPool)
         evmLabelManager = EvmLabelManager(provider: hsLabelProvider, storage: evmLabelStorage, syncerStateStorage: syncerStateStorage)
       
-      let safeCoinKitManager = SafeCoinKitManager()
+        let derivableSyncSourceStorage = DerivableSyncSourceStorage(dbPool: dbPool)
+        derivableSyncSourceManager = DerivableBlockchainManager(
+          marketKit: marketKit,
+          storage: blockchainSettingsStorage,
+          derivableSourcesStorage: derivableSyncSourceStorage
+        )
+      
+      let safeCoinKitManager = SafeCoinKitManager(syncSourceManager: derivableSyncSourceManager)
 
         let adapterFactory = AdapterFactory(
             evmBlockchainManager: evmBlockchainManager,

@@ -2,6 +2,7 @@ import Foundation
 import HsToolKit
 import BigInt
 import Combine
+import MarketKit
 
 public class SafeCoinKit {
   private let signer: SafeCoinSigner
@@ -10,48 +11,50 @@ public class SafeCoinKit {
   private let transactionManager: SafeCoinTransactionManager
   private let transactionSender: SafeCoinTransactionSender
   private let feeProvider: SafeCoinFeeProvider
-  private let rpcSourceStorage: SafeCoinRpcSourceStorage
   
   public let address: String
-  public let network: SafeCoinNetwork
+  public var networkUrl: String
   
   
   init(
     address: String,
-    network: SafeCoinNetwork,
+    networkUrl: String,
     syncer: SafeCoinSyncer,
     accountInfoManager: SafeCoinAccountInfoManager,
     transactionManager: SafeCoinTransactionManager,
     transactionSender: SafeCoinTransactionSender,
     feeProvider: SafeCoinFeeProvider,
-    rpcSourceStorage: SafeCoinRpcSourceStorage,
     signer: SafeCoinSigner
   ) {
     self.address = address
-    self.network = network
+    self.networkUrl = networkUrl
     self.accountInfoManager = accountInfoManager
     self.transactionManager = transactionManager
     self.transactionSender = transactionSender
     self.syncer = syncer
     self.feeProvider = feeProvider
-    self.rpcSourceStorage = rpcSourceStorage
     self.signer = signer
+  }
+  
+  func updateNetwork(source: String) {
+    self.networkUrl = source
+    self.syncer.updateGridProviderNetwork(source: source)
   }
 }
 
 extension SafeCoinKit {
   
-  //    public var lastBlockHeight: Int? {
-  //        syncer.lastBlockHeight
-  //    }
+  func isMainNet() -> Bool {
+    SafeCoinNetwork.isMainNet(source: self.networkUrl)
+  }
+  
+  public var lastBlockHeight: Int? {
+    syncer.lastBlockHeight
+  }
   
   public var syncState: SafeCoinSyncState {
     syncer.state
   }
-  
-  //    public var accountActive: Bool {
-  //        accountInfoManager.accountActive
-  //    }
   
   public var safeCoinSigner: SafeCoinSigner {
     self.signer
@@ -61,9 +64,9 @@ extension SafeCoinKit {
     self.address
   }
   
-  //    public var lastBlockHeightPublisher: AnyPublisher<Int, Never> {
-  //        syncer.$lastBlockHeight.eraseToAnyPublisher()
-  //    }
+  public var lastBlockHeightPublisher: AnyPublisher<Int, Never> {
+    syncer.$lastBlockHeight.eraseToAnyPublisher()
+  }
   
   public var syncStatePublisher: AnyPublisher<SafeCoinSyncState, Never> {
     syncer.$state.eraseToAnyPublisher()
@@ -85,72 +88,42 @@ extension SafeCoinKit {
     accountInfoManager.balancePublisher/*(contractAddress: contractAddress)*/
   }
   
-  //    public func transactions(tagQueries: [TransactionTagQuery], fromHash: Data? = nil, limit: Int? = nil) -> [FullTransaction] {
-  //        transactionManager.fullTransactions(tagQueries: tagQueries, fromHash: fromHash, limit: limit)
-  //    }
+  func transactionsPublisher(
+    token: MarketKit.Token?,
+    filter: TransactionTypeFilter
+  ) -> AnyPublisher<[SafeCoinTransaction], Never> {
+      return transactionManager.transactionsPublisher(token: token, filter: filter)
+  }
   
-  public func estimateFee(
+  func transactions(
+    from: TransactionRecord?,
+    token: MarketKit.Token?,
+    filter: TransactionTypeFilter,
+    limit: Int
+  ) -> [SafeCoinTransaction] {
+    transactionManager.transactions(from: from, token: token, filter: filter, limit: limit)
+  }
+  
+  public func prepareTransaction(
     to: String,
     sendAmount: BigUInt
   ) async throws -> DerivablePreparedTransaction {
-    try await feeProvider.estimateFee(
+    try await feeProvider.prepareTransaction(
       to: to,
       sendAmount: sendAmount,
       currentAmount: accountInfoManager.safeCoinBalance
     )
   }
   
-  //    public func transferContract(toAddress: Address, value: Int) -> TransferContract {
-  //        TransferContract(amount: value, ownerAddress: address, toAddress: toAddress)
-  //    }
-  
-  //    public func transferTrc20TriggerSmartContract(contractAddress: Address, toAddress: Address, amount: BigUInt) -> TriggerSmartContract {
-  //        let transferMethod = TransferMethod(to: toAddress, value: amount)
-  //        let data = transferMethod.encodedABI().hs.hex
-  //        let parameter = ContractMethodHelper.encodedABI(methodId: Data(), arguments: transferMethod.arguments).hs.hex
-  //
-  //        return TriggerSmartContract(
-  //            data: data,
-  //            ownerAddress: address,
-  //            contractAddress: contractAddress,
-  //            callValue: nil,
-  //            callTokenValue: nil,
-  //            tokenId: nil,
-  //            functionSelector: TransferMethod.methodSignature,
-  //            parameter: parameter
-  //        )
-  //    }
-  
-  //    public func send(contract: Contract, signer: Signer, feeLimit: Int? = 0) async throws  {
-  //        let newTransaction = try await transactionSender.sendTransaction(contract: contract, signer: signer, feeLimit: feeLimit)
-  //        transactionManager.handle(newTransaction: newTransaction)
-  //    }
-  
-//  public func send(address: String, amount: BigUInt) async throws {
-//    let fee = try await estimateFee(to: address, sendAmount: amount)
-//    let newTransaction = try await transactionSender.sendTransaction(
-//      to: address,
-//      amount: amount,
-//      fee: BigUInt(fee.expectedFee.total)
-//    )
-//    transactionManager.handle(/*newTransaction: newTransaction*/)
-//  }
-  
-//  public func send(transaction: String) async throws {
-//    let transactionId = try await transactionSender.sendTransaction(transaction: transaction)
-//    print(">>> SafeCoinKit send transaction, answer transactionId: \(transactionId)")
-//    transactionManager.handle(/*newTransaction: newTransaction*/)
-//  }
+  public func calcMinRent() async throws -> BigUInt {
+    try await feeProvider.calcMinRent()
+  }
   
   public func send(transaction: DerivablePreparedTransaction) async throws {
     let transactionId = try await transactionSender.sendTransaction(transaction: transaction)
     print(">>> SafeCoinKit send transaction, answer transactionId: \(transactionId)")
     transactionManager.handle(/*newTransaction: newTransaction*/)
   }
-  
-  //    public func accountActive(address: Address) async throws -> Bool {
-  //        try await feeProvider.isAccountActive(address: address)
-  //    }
   
   public func start() {
     syncer.start()
@@ -163,10 +136,6 @@ extension SafeCoinKit {
   public func refresh() {
     syncer.refresh()
   }
-  
-  //    public func fetchTransaction(hash: Data) async throws -> FullTransaction {
-  //        throw SyncError.notStarted
-  //    }
 }
 
 extension SafeCoinKit {
@@ -185,11 +154,13 @@ extension SafeCoinKit {
   public static func instance(
     signer: SafeCoinSigner,
     address: String,
-    network: SafeCoinNetwork,
+    networkUrl: String,
     walletId: String,
     logger: Logger = Logger(minLogLevel: .error)
   ) throws -> SafeCoinKit {
     let databaseDirectoryUrl = try dataDirectoryUrl()
+    
+    //TODO тут наверное надо заменить на DerivableStorage
     
     let accountInfoStorage = SafeCoinAccountInfoStorage(
       databaseDirectoryUrl: databaseDirectoryUrl,
@@ -199,9 +170,10 @@ extension SafeCoinKit {
       databaseDirectoryUrl: databaseDirectoryUrl,
       databaseFileName: "safe-coin-transactions-storage"
     )
-    let rpcSourceStorage = SafeCoinRpcSourceStorage(
+
+    let syncerStorage = DerivableCoinSyncerStorage(
       databaseDirectoryUrl: databaseDirectoryUrl,
-      databaseFileName: "safe-coin-rpc-sources-storage"
+      databaseFileName: "derivable-syncer-storage"
     )
     
     let accountInfoManager = SafeCoinAccountInfoManager(storage: accountInfoStorage, address: address)
@@ -210,7 +182,7 @@ extension SafeCoinKit {
     let networkManager = NetworkManager(logger: logger)
     
     let safeCoinGridProvider = SafeCoinGridProvider(
-      baseUrl: provideUrl(network: network),
+      baseUrl: networkUrl,
       networkManager: networkManager,
       safeCoinSigner: signer
     )
@@ -220,31 +192,24 @@ extension SafeCoinKit {
       accountInfoManager: accountInfoManager,
       transactionManager: transactionManager,
       safeCoinGridProvider: safeCoinGridProvider,
+      syncerStorage: syncerStorage,
       address: address
     )
     let transactionSender = SafeCoinTransactionSender(safeCoinGridProvider: safeCoinGridProvider)
     
     let kit = SafeCoinKit(
       address: address,
-      network: network,
+      networkUrl: networkUrl,
       syncer: syncer,
       accountInfoManager: accountInfoManager,
       transactionManager: transactionManager,
       transactionSender: transactionSender,
       feeProvider: feeProvider,
-      rpcSourceStorage: rpcSourceStorage,
       signer: signer
     )
     
     return kit
   }
-  
-  //    public static func call(networkManager: NetworkManager, network: Network, contractAddress: Address, data: Data, apiKey: String?) async throws -> Data {
-  //        let tronGridProvider = TronGridProvider(networkManager: networkManager, baseUrl: providerUrl(network: network), apiKey: apiKey)
-  //        let rpc = CallJsonRpc(contractAddress: contractAddress, data: data)
-  //
-  //        return try await tronGridProvider.fetch(rpc: rpc)
-  //    }
   
   private static func dataDirectoryUrl() throws -> URL {
     let fileManager = FileManager.default
@@ -256,15 +221,6 @@ extension SafeCoinKit {
     try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
     
     return url
-  }
-  
-  private static func provideUrl(network: SafeCoinNetwork) -> String {
-    switch network {
-    case .mainNet: return "https://api.mainnet-beta.safecoin.org/"
-    case .testNet: return "https://api.testnet.safecoin.org/"
-    case .devNet: return "https://devnet.safely.org/"
-    case .custom(_, let url): return url
-    }
   }
   
 }
