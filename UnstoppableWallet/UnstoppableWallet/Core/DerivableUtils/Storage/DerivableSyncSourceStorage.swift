@@ -4,14 +4,6 @@ import GRDB
 class DerivableSyncSourceStorage {
   private let dbPool: DatabasePool
   
-//  init(databaseDirectoryUrl: URL, databaseFileName: String) {
-//    let databaseURL = databaseDirectoryUrl.appendingPathComponent("\(databaseFileName).sqlite")
-//    
-//    dbPool = try! DatabasePool(path: databaseURL.path)
-//    
-//    try! migrator.migrate(dbPool)
-//  }
-  
   init(dbPool: DatabasePool) {
     self.dbPool = dbPool
     
@@ -29,7 +21,10 @@ class DerivableSyncSourceStorage {
         t.column(DerivableRpcSource.Columns.name.name, .text).notNull()
         t.column(DerivableRpcSource.Columns.createdAt.name, .integer).notNull()
         t.primaryKey(
-          [DerivableRpcSource.Columns.link.name, DerivableRpcSource.Columns.blockchainUid.name],
+          [
+            DerivableRpcSource.Columns.link.name,
+            DerivableRpcSource.Columns.blockchainUid.name
+          ],
           onConflict: .replace
         )
       }
@@ -40,7 +35,6 @@ class DerivableSyncSourceStorage {
 }
 
 extension DerivableSyncSourceStorage {
-  //TODO сохранять сорцы, тут только сорцы, выбранный хранится в таблице btc
   
   func get(blockchainUid: String) -> [DerivableRpcSource] {
     try! dbPool.read { db in

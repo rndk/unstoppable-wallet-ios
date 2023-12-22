@@ -1,8 +1,14 @@
 import Foundation
 import GRDB
 
-class DerivableCoinSyncerStorage {
+public class DerivableCoinSyncerStorage {
   private let dbPool: DatabasePool
+  
+  init (dbPool: DatabasePool) {
+    self.dbPool = dbPool
+    
+    try! migrator.migrate(dbPool)
+  }
   
   init(databaseDirectoryUrl: URL, databaseFileName: String) {
     let databaseURL = databaseDirectoryUrl.appendingPathComponent("\(databaseFileName).sqlite")

@@ -4,7 +4,7 @@ import RxSwift
 class SafeCoinAdapter: BaseSafeCoinAdapter {
   static let decimals = 9
   
-  override init(safeCoinKitWrapper: SafeCoinKitWrapper) {
+  override init(safeCoinKitWrapper: DerivableCoinKitWrapper) {
     super.init(safeCoinKitWrapper: safeCoinKitWrapper)
   }
 }

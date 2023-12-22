@@ -21,12 +21,12 @@ public struct DerivableKeyPair: Codable, Hashable {
     self.phrase = words
   }
   
-  public init(seed: Data, words: [String]) throws {
+  public init(path: DerivablePath, seed: Data, words: [String]) throws {
     let phrase = words
     let publicKey: PublicKey
     let secretKey: Data
     
-    let keys = try Ed25519HDKey.derivePath(DerivablePath.default.rawValue, seed: seed.toHexString()).get()
+    let keys = try Ed25519HDKey.derivePath(path.rawValue, seed: seed.toHexString()).get()
     let keyPair = try NaclSign.KeyPair.keyPair(fromSeed: keys.key)
     let newKey = try PublicKey(data: keyPair.publicKey)
     

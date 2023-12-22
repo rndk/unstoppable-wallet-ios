@@ -1,38 +1,42 @@
 import Foundation
 import HsExtensions
 
-class SafeCoinSyncer {
+class DerivableCoinSyncer {
   
   private var tasks = Set<AnyTask>()
   
-  private let accountInfoManager: SafeCoinAccountInfoManager
-  private let transactionManager: SafeCoinTransactionManager
-  private let safeCoinGridProvider: SafeCoinGridProvider
+  private let accountInfoManager: DerivableCoinAccountInfoManager
+  private let transactionManager: DerivableCoinTransactionManager
+  private let networkInteractor: DerivableCoinNetworkInteractor
   private let storage: DerivableCoinSyncerStorage
+  private var blockchainUid: String
   private var address: String = ""
   
   private var syncing: Bool = false
   
-  @DistinctPublished private(set) var state: SafeCoinSyncState = .notSynced(error: SafeCoinSyncState.SyncError.notStarted)
+  @DistinctPublished private(set) var state: DerivableCoinSyncState = .notSynced(error: DerivableCoinSyncState.SyncError.notStarted)
   @DistinctPublished private(set) var lastBlockHeight: Int = 0
   
   init(
-    accountInfoManager: SafeCoinAccountInfoManager,
-    transactionManager: SafeCoinTransactionManager,
-    safeCoinGridProvider: SafeCoinGridProvider,
+    accountInfoManager: DerivableCoinAccountInfoManager,
+    transactionManager: DerivableCoinTransactionManager,
+    networkInteractor: DerivableCoinNetworkInteractor,
     syncerStorage: DerivableCoinSyncerStorage,
-    address: String
+    address: String,
+    blockchainUid: String
   ) {
     self.accountInfoManager = accountInfoManager
     self.transactionManager = transactionManager
-    self.safeCoinGridProvider = safeCoinGridProvider
+    self.networkInteractor = networkInteractor
     self.storage = syncerStorage
     self.address = address
+    self.blockchainUid = blockchainUid
     
-    lastBlockHeight = Int(storage.lastBlockHeight(address: address, coinUid: "safe-coin-2"))
+//    lastBlockHeight = Int(storage.lastBlockHeight(address: address, coinUid: "safe-coin-2"))
+    lastBlockHeight = Int(storage.lastBlockHeight(address: address, coinUid: self.blockchainUid))
   }
   
-  private func set(state: SafeCoinSyncState) {
+  private func set(state: DerivableCoinSyncState) {
     self.state = state
     
     if case .syncing = state {} else {
@@ -41,15 +45,15 @@ class SafeCoinSyncer {
   }
   
   func updateGridProviderNetwork(source: String) {
-    self.safeCoinGridProvider.updateBaseUrl(newSourceUrl: source)
+    self.networkInteractor.updateBaseUrl(newSourceUrl: source)
   }
   
 }
 
-extension SafeCoinSyncer {
+extension DerivableCoinSyncer {
   
   var source: String {
-    "RPC \(safeCoinGridProvider.source)"
+    "RPC \(networkInteractor.source)"
   }
   
   func start() {
@@ -57,68 +61,61 @@ extension SafeCoinSyncer {
   }
   
   func stop() {
-    //TODO tasks cancel?
     tasks.forEach({t in t.cancel()})
     tasks.removeAll()
   }
   
   func refresh() {
-    //        switch syncTimer.state {
-    //        case .ready:
-    //            sync()
-    //        case .notReady:
-    //            syncTimer.start()
-    //        }
     if !state.syncing {
       sync()
     }
   }
   
   func sync() {
-    print(">>> SafeCoinSyncer sync() start...")
-    Task { [weak self, safeCoinGridProvider, address, transactionManager, accountInfoManager, storage] in
+    print(">>> DerivableCoinSyncer sync() start...")
+    Task { [weak self, networkInteractor, address, transactionManager, accountInfoManager, storage, blockchainUid] in
       do {
         guard let syncer = self, !syncer.syncing else {
           return
         }
         syncer.syncing = true
         
-        print(">>> SafeCoinSyncer try get balance >>>")
-        let balance = try await safeCoinGridProvider.getBalance(address: address)
+        let balance = try await networkInteractor.getBalance(address: address)
         accountInfoManager.handle(newBalance: balance)
-        print(">>> saef coien blance: \(balance)")
+        print(">>> DerivableCoinSyncer saef coien blance: \(balance)")
         
         //todo blockHeight
-        let newLastBlockHeight = try await safeCoinGridProvider.getLastBlockHeight()
+        let newLastBlockHeight = try await networkInteractor.getLastBlockHeight()
         if self?.lastBlockHeight != Int(newLastBlockHeight) {
-          storage.save(address: address, coinUid: "safe_coin_2", blockHeight: newLastBlockHeight)
+//          storage.save(address: address, coinUid: "safe_coin_2", blockHeight: newLastBlockHeight)
+          storage.save(address: address, coinUid: blockchainUid, blockHeight: newLastBlockHeight)
           self?.lastBlockHeight = Int(newLastBlockHeight)
-          print(">>> newLastBlockHeight: \(newLastBlockHeight)")
+          print(">>> DerivableCoinSyncer newLastBlockHeight: \(newLastBlockHeight)")
         }
         
         let lastTransactionHash = transactionManager.getLastTransaction()?.hash
-        print(">>> las transaction hash: \(lastTransactionHash)")
+        print(">>> DerivableCoinSyncer last transaction hash: \(lastTransactionHash)")
         
         //let rpcSignatureInfos = try await self?.getSignaturesFromRpcNode(
         //  lastTransactionHash: lastTransactionHash
         //)
         //print(">>> rpcSignaturesInfo: \(rpcSignaturesInfo?.count)")
-        let safeTransfers = try await safeCoinGridProvider.safeTransfers(address: address)
-        let splTransfers = try await safeCoinGridProvider.splTransfers(address: address)
+        let safeTransfers = try await networkInteractor.safeTransfers(address: address)
+        let splTransfers = try await networkInteractor.splTransfers(address: address)
         let safeRpcExportedTxs = (safeTransfers + splTransfers).sorted(by: {$0.blockTime < $1.blockTime })
         
         //let tokenAccounts = try await self?.getTokenAccounts()
         //let mintAccounts = self?.getMintAccounts(tokenAccounts.map { $0.mintAddress })
-        print(">>> SafeCoinSyncer transactions: \(safeRpcExportedTxs)")
+        print(">>> DerivableCoinSyncer transactions: \(safeRpcExportedTxs)")
         
         //let transactions =
         //TODO короч тут минт эти штуки надо сделать как в андроиде
         transactionManager.save(transactions: safeRpcExportedTxs, replaceOnConflict: true)
         
         self?.set(state: .synced)
-        print(">>> SafeCoinSyncer sync() complete...")
+        print(">>> DerivableCoinSyncer sync() complete...")
       } catch {
-        print(">>> SafeCoinSyncer error while syncing \(error)")
+        print(">>> DerivableCoinSyncer error while syncing \(error)")
         self?.set(state: .notSynced(error: error))
       }
     }.store(in: &tasks)
@@ -145,10 +142,10 @@ extension SafeCoinSyncer {
     lastTransactionHash: String?,
     before: String? = nil
   ) async throws -> [DerivableSignatureInfo] {
-    return try await safeCoinGridProvider.getSignaturesForAddress(address: address)
+    return try await networkInteractor.getSignaturesForAddress(address: address)
   }
   
   private func getTokenAccounts() async throws -> [String] {
-    return try await safeCoinGridProvider.getTokenAccountsByOwner(address: address)
+    return try await networkInteractor.getTokenAccountsByOwner(address: address)
   }
 }

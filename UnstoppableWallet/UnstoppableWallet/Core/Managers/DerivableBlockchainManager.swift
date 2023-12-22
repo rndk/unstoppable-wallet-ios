@@ -51,6 +51,7 @@ extension DerivableBlockchainManager {
 //  }
   
   func defaultSyncSources(blockchainType: BlockchainType) -> [DerivableRpcSource] {
+    //TODO сюда добавить стандартные блокчейн сорцы для остальных блокчейнов
     switch blockchainType {
     case .safeCoin: return [
       DerivableRpcSource(

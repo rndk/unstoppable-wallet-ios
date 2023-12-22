@@ -3,42 +3,66 @@ import BigInt
 import Alamofire
 import HsToolKit
 
-class SafeCoinGridProvider {
-  
+class DerivableCoinNetworkInteractor {
   private var baseUrl: String
+  private var blockchainUid: String
   private let networkManager: NetworkManager
+  private let signer: DerivableCoinSigner
+  
+  private let systemProgramId: PublicKey
+  private let tokenProgramId: PublicKey
+  private let associatedProgramId: PublicKey
+  private let sysvarRent: PublicKey
+  
   private let apiClient: JSONRPCAPIClient
   private let blockchainClient: BlockchainClient
-  private let safeCoinSigner: SafeCoinSigner
   
-  private let headers: HTTPHeaders
   private var currentRpcId = 0
   private let pageLimit = 1000
   
   init(
     baseUrl: String,
+    blockchainUid: String,
     networkManager: NetworkManager,
-    safeCoinSigner: SafeCoinSigner
+    signer: DerivableCoinSigner,
+    systemProframId: PublicKey,
+    tokenProgramId: PublicKey,
+    associatedProgramId: PublicKey,
+    sysvarRent: PublicKey
   ) {
     self.baseUrl = baseUrl
+    self.blockchainUid = blockchainUid
     self.networkManager = networkManager
-    self.safeCoinSigner = safeCoinSigner
+    self.signer = signer
     self.apiClient = JSONRPCAPIClient(endpoint: baseUrl)
     
-    self.headers = HTTPHeaders()
+    self.systemProgramId = systemProframId
+    self.tokenProgramId = tokenProgramId
+    self.associatedProgramId = associatedProgramId
+    self.sysvarRent = sysvarRent
+    
+//    self.headers = HTTPHeaders()
+    
+//    self.blockchainClient = BlockchainClient(
+//      apiClient: self.apiClient,
+//      systemProgrammId: SafeCoinTokenProgram.systemProgramId,
+//      tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
+//      associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
+//      sysvarRent: SafeCoinTokenProgram.sysvarRent
+//    )
     
     self.blockchainClient = BlockchainClient(
       apiClient: self.apiClient,
-      systemProgrammId: SafeCoinTokenProgram.systemProgramId,
-      tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
-      associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
-      sysvarRent: SafeCoinTokenProgram.sysvarRent
+      systemProgrammId: self.systemProgramId,
+      tokenProgramId: self.tokenProgramId,
+      associatedProgramId: self.associatedProgramId,
+      sysvarRent: self.sysvarRent
     )
   }
   
 }
 
-extension SafeCoinGridProvider {
+extension DerivableCoinNetworkInteractor {
   
   public enum RequestError: Error {
     case invalidResponse
@@ -49,7 +73,7 @@ extension SafeCoinGridProvider {
   
 }
 
-extension SafeCoinGridProvider {
+extension DerivableCoinNetworkInteractor {
   
   func updateBaseUrl(newSourceUrl: String) {
     self.baseUrl = newSourceUrl
@@ -78,19 +102,20 @@ extension SafeCoinGridProvider {
     return try await apiClient.getSignaturesForAddress(address: address, configs: requestConfiguration)
   }
   
-  func safeTransfers(address: String) async throws -> [SafeCoinTransaction] {
+  func safeTransfers(address: String) async throws -> [DerivableCoinTransaction] {
     print(">>> SafeCoinGridProvider safeTransfers address: \(address)")
     let signaturesInfos = try await apiClient.getSignaturesForAddress(
       address: address, configs: RequestConfiguration(limit: pageLimit)
     )
-    var result: [SafeCoinTransaction] = []
+    var result: [DerivableCoinTransaction] = []
     for signatureInfo in signaturesInfos {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
       
       let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
       let amount = transferInfo?.lamports ?? UInt64(transferInfo?.amount ?? "0")
       
-      let transaction = SafeCoinTransaction(
+      let transaction = DerivableCoinTransaction(
+        blockchainUid: self.blockchainUid,
         hash: signatureInfo.signature,
         currentAddress: address,
         blockTime: signatureInfo.blockTime ?? 0,
@@ -105,8 +130,8 @@ extension SafeCoinGridProvider {
     return result
   }
   
-  func splTransfers(address: String) async throws -> [SafeCoinTransaction] {
-    var result: [SafeCoinTransaction] = []
+  func splTransfers(address: String) async throws -> [DerivableCoinTransaction] {
+    var result: [DerivableCoinTransaction] = []
     let tokenAccounts = try await getTokenAccountsByOwnerStrings(address: address)
     if tokenAccounts.isEmpty {
       return result
@@ -118,7 +143,8 @@ extension SafeCoinGridProvider {
 //      let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
 //      let amount = transferInfo?.lamports ?? (UInt64(transferInfo?.amount ?? "0"))
       
-      let transaction = SafeCoinTransaction(
+      let transaction = DerivableCoinTransaction(
+        blockchainUid: self.blockchainUid,
         hash: signatureInfo.signature,
         currentAddress: address,
         blockTime: signatureInfo.blockTime ?? 0,
@@ -136,7 +162,8 @@ extension SafeCoinGridProvider {
   func getTokenAccountsByOwner(address: String) async throws -> [String] {
     let infoParams = OwnerInfoParams(
       mint: nil,
-      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
+//      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
+      programId: tokenProgramId.base58EncodedString
     )
     let accounts = try await apiClient.getTokenAccountsByOwner(
       pubkey: address,
@@ -152,7 +179,8 @@ extension SafeCoinGridProvider {
   func getTokenAccountsByOwnerStrings(address: String) async throws -> [String] {
     let infoParams = OwnerInfoParams(
       mint: nil,
-      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
+//      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
+      programId: tokenProgramId.base58EncodedString
     )
     let accounts = try await apiClient.getTokenAccountsByOwner(
       pubkey: address,
@@ -167,7 +195,7 @@ extension SafeCoinGridProvider {
   
   func prepareTransaction(to: String, amount: UInt64) async throws -> DerivablePreparedTransaction {
     let preparedTransaction = try await blockchainClient.prepareSendingNative(
-      from: safeCoinSigner.addressKeyPair(),
+      from: signer.addressKeyPair(),
       to: to,
       amount: amount
     )

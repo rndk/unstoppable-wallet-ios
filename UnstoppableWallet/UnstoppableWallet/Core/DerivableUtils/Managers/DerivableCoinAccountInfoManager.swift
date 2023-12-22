@@ -3,37 +3,43 @@ import BigInt
 import Combine
 import HsExtensions
 
-class SafeCoinAccountInfoManager {
-  private let storage: SafeCoinAccountInfoStorage
+class DerivableCoinAccountInfoManager {
+  private let storage: DerivableCoinAccountInfoStorage
   private let address: String
+  private let blockchainUid: String
   
-  init(storage: SafeCoinAccountInfoStorage, address: String) {
+  init(
+    storage: DerivableCoinAccountInfoStorage,
+    address: String,
+    blockchainUid: String
+  ) {
     self.storage = storage
     self.address = address
+    self.blockchainUid = blockchainUid
   }
   
   private let balanceSubject = PassthroughSubject<BigUInt, Never>()
   
-  var safeCoinBalance: BigUInt {
-    storage.balance(address: self.address) ?? 0
+  var coinBalance: BigUInt {
+    storage.balance(address: self.address, blockchainUid: blockchainUid) ?? 0
   }
   
   var accountActive: Bool = true
 }
 
-extension SafeCoinAccountInfoManager {
+extension DerivableCoinAccountInfoManager {
   var balancePublisher: AnyPublisher<BigUInt, Never> {
     balanceSubject.eraseToAnyPublisher()
   }
   
   func balance(contractAddress: String) -> BigUInt {
-    storage.balance(address: contractAddress) ?? 0
+    storage.balance(address: contractAddress, blockchainUid: blockchainUid) ?? 0
   }
   
   func handle(newBalance: UInt64) {
     accountActive = true
     let balance = BigUInt(newBalance)
-    storage.save(balance: balance, address: self.address)
+    storage.save(balance: balance, address: self.address, blockchainUid: blockchainUid)
     balanceSubject.send(balance)
   }
   

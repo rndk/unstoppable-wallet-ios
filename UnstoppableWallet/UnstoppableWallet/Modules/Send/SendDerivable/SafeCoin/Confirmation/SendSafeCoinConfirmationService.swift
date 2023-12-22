@@ -10,7 +10,7 @@ class SendSafeCoinConfirmationService {
   
   private let safeCoinDecimals = Decimal(1_000_000_000)
   private let feeService: SendFeeService
-  private let safeCoinKitWrapper: SafeCoinKitWrapper
+  private let safeCoinKitWrapper: DerivableCoinKitWrapper
   private let evmLabelManager: EvmLabelManager
   private let sendAddress: Address?
   
@@ -49,7 +49,7 @@ class SendSafeCoinConfirmationService {
   
   init(
     sendData: SendSafeCoinService.SendData,
-    safeCoinKitWrapper: SafeCoinKitWrapper,
+    safeCoinKitWrapper: DerivableCoinKitWrapper,
     feeService: SendFeeService,
     evmLabelManager: EvmLabelManager
   ) {
@@ -65,8 +65,8 @@ class SendSafeCoinConfirmationService {
     syncAddress()
   }
   
-  private var safeCoinKit: SafeCoinKit {
-    safeCoinKitWrapper.safeCoinKit
+  private var safeCoinKit: DerivableCoinKit {
+    safeCoinKitWrapper.coinKit
   }
   
   private func prepareTransaction() {

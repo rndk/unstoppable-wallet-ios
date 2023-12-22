@@ -70,6 +70,10 @@ class App {
     let evmBlockchainManager: EvmBlockchainManager
     let binanceKitManager: BinanceKitManager
     let tronAccountManager: TronAccountManager
+  
+    let derivableAccountStorage: DerivableCoinAccountInfoStorage
+    let derivableTransactionsStorage: DerivableCoinTransactionStorage
+    let derivableSyncerStorage: DerivableCoinSyncerStorage
 
     let restoreSettingsManager: RestoreSettingsManager
     let predefinedBlockchainService: PredefinedBlockchainService
@@ -218,7 +222,11 @@ class App {
           derivableSourcesStorage: derivableSyncSourceStorage
         )
       
-      let safeCoinKitManager = SafeCoinKitManager(syncSourceManager: derivableSyncSourceManager)
+        derivableAccountStorage = DerivableCoinAccountInfoStorage(dbPool: dbPool)
+        derivableTransactionsStorage = DerivableCoinTransactionStorage(dbPool: dbPool)
+        derivableSyncerStorage = DerivableCoinSyncerStorage(dbPool: dbPool)
+      
+        let derivableCoinKitManager = DerivableCoinKitManager(syncSourceManager: derivableSyncSourceManager)
 
         let adapterFactory = AdapterFactory(
             evmBlockchainManager: evmBlockchainManager,
@@ -229,7 +237,7 @@ class App {
             restoreSettingsManager: restoreSettingsManager,
             coinManager: coinManager,
             evmLabelManager: evmLabelManager,
-            safeCoinKitManager: safeCoinKitManager
+            derivableCoinKitManager: derivableCoinKitManager
         )
         adapterManager = AdapterManager(
             adapterFactory: adapterFactory,

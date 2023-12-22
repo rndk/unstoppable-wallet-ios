@@ -188,7 +188,7 @@ extension SendSafeCoinService: IAmountInputService {
   func sync(address: String) {
     let safeCoinAddress = Address(raw: address.trimmingCharacters(in: .whitespacesAndNewlines))
     
-    guard safeCoinAddress.raw != adapter.safeCoinKitWrapper.safeCoinKit.receiveAddress else {
+    guard safeCoinAddress.raw != adapter.wrapper.coinKit.receiveAddress else {
       state = .notReady
       addressError = AddressError.ownAddress
       return

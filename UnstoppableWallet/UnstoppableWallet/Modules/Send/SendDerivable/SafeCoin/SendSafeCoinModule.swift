@@ -63,7 +63,7 @@ class SendSafeCoinModule {
     )
     
     let viewController = SendSafeCoinViewController(
-      safeCoinKitWrapper: (adapter as! SafeCoinAdapter).safeCoinKitWrapper,
+      safeCoinKitWrapper: (adapter as! SafeCoinAdapter).wrapper,
       viewModel: viewModel,
       availableBalanceViewModel: availableBalanceViewModel,
       amountViewModel: amountViewModel,

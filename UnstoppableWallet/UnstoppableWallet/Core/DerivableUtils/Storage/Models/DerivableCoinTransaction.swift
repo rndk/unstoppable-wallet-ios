@@ -1,7 +1,8 @@
 import Foundation
 import GRDB
 
-public class SafeCoinTransaction: Record {
+public class DerivableCoinTransaction: Record {
+  public let blockchainUid: String
   public let hash: String
   public let currentAddress: String
   public let blockTime: UInt64
@@ -12,6 +13,7 @@ public class SafeCoinTransaction: Record {
   public let isFailed: Bool
   
   init(
+    blockchainUid: String,
     hash: String,
     currentAddress: String,
     blockTime: UInt64,
@@ -21,6 +23,7 @@ public class SafeCoinTransaction: Record {
     fee: UInt64,
     isFailed: Bool
   ) {
+    self.blockchainUid = blockchainUid
     self.hash = hash
     self.currentAddress = currentAddress
     self.blockTime = blockTime
@@ -34,10 +37,11 @@ public class SafeCoinTransaction: Record {
   }
   
   override public class var databaseTableName: String {
-    "safe_coin_transactions"
+    "derivable_coin_transactions"
   }
   
   enum Columns: String, ColumnExpression, CaseIterable {
+    case blockchainUid
     case hash
     case currentAddress
     case blockTime
@@ -49,6 +53,7 @@ public class SafeCoinTransaction: Record {
   }
   
   required init(row: Row) {
+    blockchainUid = row[Columns.blockchainUid]
     hash = row[Columns.hash]
     currentAddress = row[Columns.currentAddress]
     blockTime = row[Columns.blockTime]
@@ -62,6 +67,7 @@ public class SafeCoinTransaction: Record {
   }
   
   override public func encode(to container: inout PersistenceContainer) {
+    container[Columns.blockchainUid] = blockchainUid
     container[Columns.hash] = hash
     container[Columns.currentAddress] = currentAddress
     container[Columns.blockTime] = blockTime

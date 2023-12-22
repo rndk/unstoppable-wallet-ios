@@ -7,7 +7,7 @@ import RxSwift
 import RxCocoa
 
 class SendSafeCoinViewController: ThemeViewController {
-  private let safeCoinKitWrapper: SafeCoinKitWrapper
+  private let safeCoinKitWrapper: DerivableCoinKitWrapper
   private let viewModel: SendSafeCoinViewModel
   private let disposeBag = DisposeBag()
   
@@ -28,7 +28,7 @@ class SendSafeCoinViewController: ThemeViewController {
   private var keyboardShown = false
   
   init(
-    safeCoinKitWrapper: SafeCoinKitWrapper,
+    safeCoinKitWrapper: DerivableCoinKitWrapper,
     viewModel: SendSafeCoinViewModel,
     availableBalanceViewModel: ISendAvailableBalanceViewModel,
     amountViewModel: AmountInputViewModel,

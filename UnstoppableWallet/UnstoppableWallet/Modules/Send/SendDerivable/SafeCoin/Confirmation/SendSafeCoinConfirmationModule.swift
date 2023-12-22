@@ -8,7 +8,7 @@ import StorageKit
 struct SendSafeCoinConfirmationModule {
   
   static func viewController(
-    safeCoinKitWrapper: SafeCoinKitWrapper,
+    safeCoinKitWrapper: DerivableCoinKitWrapper,
     sendData: SendSafeCoinService.SendData
   ) -> UIViewController? {
     guard let coinServiceFactory = EvmCoinServiceFactory(

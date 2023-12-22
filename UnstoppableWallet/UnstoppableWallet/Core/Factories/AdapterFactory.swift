@@ -13,10 +13,10 @@ class AdapterFactory {
     private let restoreSettingsManager: RestoreSettingsManager
     private let coinManager: CoinManager
     private let evmLabelManager: EvmLabelManager
-    private let safeCoinKitManager: SafeCoinKitManager
+    private let derivableCoinKitManager: DerivableCoinKitManager
 
     init(evmBlockchainManager: EvmBlockchainManager, evmSyncSourceManager: EvmSyncSourceManager, binanceKitManager: BinanceKitManager, btcBlockchainManager: BtcBlockchainManager, tronKitManager: TronKitManager,
-         restoreSettingsManager: RestoreSettingsManager, coinManager: CoinManager, evmLabelManager: EvmLabelManager, safeCoinKitManager: SafeCoinKitManager) {
+         restoreSettingsManager: RestoreSettingsManager, coinManager: CoinManager, evmLabelManager: EvmLabelManager, derivableCoinKitManager: DerivableCoinKitManager) {
         self.evmBlockchainManager = evmBlockchainManager
         self.evmSyncSourceManager = evmSyncSourceManager
         self.binanceKitManager = binanceKitManager
@@ -25,7 +25,7 @@ class AdapterFactory {
         self.restoreSettingsManager = restoreSettingsManager
         self.coinManager = coinManager
         self.evmLabelManager = evmLabelManager
-        self.safeCoinKitManager = safeCoinKitManager
+        self.derivableCoinKitManager = derivableCoinKitManager
     }
 
     private func evmAdapter(wallet: Wallet) -> IAdapter? {
@@ -75,9 +75,17 @@ class AdapterFactory {
     }
   
     private func safeCoinAdapter(wallet: Wallet) -> IAdapter? {
-        print(">>> safeCoinAdapter()... \(wallet)") //TODO remove
-        guard let safeCoinKitWrapper = try? safeCoinKitManager.safeCoinKit(account: wallet.account, blockChainType: .safeCoin) else {
-            print(">>> safeCoinAdapter() error -> return nil...") //TODO remove
+        print(">>> ADAPTERFACTORY safeCoinAdapter()... \(wallet)") //TODO remove
+        guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
+          account: wallet.account,
+          blockChainType: .safeCoin,
+          systemProframId: SafeCoinTokenProgram.systemProgramId,
+          tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
+          associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
+          sysvarRent: SafeCoinTokenProgram.sysvarRent,
+          coinId: 19165
+        ) else {
+            print(">>> ADAPTERFACTORY safeCoinAdapter() error -> return nil...") //TODO remove
             return nil
         }
         
@@ -116,7 +124,7 @@ extension AdapterFactory {
     }
   
     func safeCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      if let safeCoinKitWrapper = safeCoinKitManager.safeCoinKit {
+      if let safeCoinKitWrapper = derivableCoinKitManager.coinKit(blockchainType: .safeCoin) {
         print(">>> AdapterFactory return non nil SafeCoinTransactionsAdapter")
         return SafeCoinTransactionsAdapter(safeCoinKitWrapper: safeCoinKitWrapper)
       }

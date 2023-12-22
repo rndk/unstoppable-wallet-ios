@@ -1,6 +1,6 @@
 import Foundation
 
-public enum SafeCoinSyncState {
+public enum DerivableCoinSyncState {
     case synced
     case syncing(progress: Double?)
     case notSynced(error: Error)
@@ -18,9 +18,9 @@ public enum SafeCoinSyncState {
     }
 }
 
-extension SafeCoinSyncState: Equatable {
+extension DerivableCoinSyncState: Equatable {
 
-    public static func ==(lhs: SafeCoinSyncState, rhs: SafeCoinSyncState) -> Bool {
+    public static func ==(lhs: DerivableCoinSyncState, rhs: DerivableCoinSyncState) -> Bool {
         switch (lhs, rhs) {
             case (.synced, .synced): return true
             case (.syncing(let lhsProgress), .syncing(let rhsProgress)): return lhsProgress == rhsProgress
@@ -31,7 +31,7 @@ extension SafeCoinSyncState: Equatable {
 
 }
 
-extension SafeCoinSyncState: CustomStringConvertible {
+extension DerivableCoinSyncState: CustomStringConvertible {
 
     public var description: String {
         switch self {
@@ -43,7 +43,7 @@ extension SafeCoinSyncState: CustomStringConvertible {
 
 }
 
-extension SafeCoinSyncState {
+extension DerivableCoinSyncState {
   
   public enum SyncError: Error {
     case notStarted

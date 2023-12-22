@@ -7,15 +7,17 @@ import MarketKit
 class SafeCoinTransactionsAdapter: BaseSafeCoinAdapter {
   
   override init(
-    safeCoinKitWrapper: SafeCoinKitWrapper
+    safeCoinKitWrapper: DerivableCoinKitWrapper
   ) {
     super.init(safeCoinKitWrapper: safeCoinKitWrapper)
     //
   }
   
-  private func convert(safeCoinTransaction: SafeCoinTransaction) -> TransactionRecord? {
+  private func convert(safeCoinTransaction: DerivableCoinTransaction) -> TransactionRecord? {
+    //TODO проверить все ли тут правильно, возможно в транзакцию надо пихать больше данных
     return TransactionRecord(
-      source: TransactionSource(blockchainType: BlockchainType(uid: "safe-coin-2"), meta: nil),
+//      source: TransactionSource(blockchainType: BlockchainType(uid: "safe-coin-2"), meta: nil),
+      source: TransactionSource(blockchainType: BlockchainType(uid: BlockchainType.safeCoin.uid), meta: nil),
       uid: safeCoinTransaction.hash,
       transactionHash: safeCoinTransaction.hash,
       transactionIndex: 0,
@@ -30,22 +32,13 @@ class SafeCoinTransactionsAdapter: BaseSafeCoinAdapter {
 
 extension SafeCoinTransactionsAdapter: ITransactionsAdapter {
   func explorerUrl(transactionHash: String) -> String? {
-    kit.networkUrl //TODO тут надо урл эксплорера в зависимости от блокчейна
+    //TODO тут надо урл эксплорера в зависимости от блокчейна
+    kit.networkUrl
   }
   
   var explorerTitle: String {
     "SafeCoinExplorer"
   }
-  
-//  func explorerUrl(transactionHash: String) -> String? {
-//    //TODO
-//    switch kit.network {
-//    case .mainNet: ""
-//    case .devNet: ""
-//    case .testNet: ""
-//    case .custom(_, let url): ""
-//    }
-//  }
   
   var syncing: Bool {
     kit.syncState.syncing
@@ -97,7 +90,6 @@ extension SafeCoinTransactionsAdapter: ITransactionsAdapter {
   }
  
   func rawTransaction(hash: String) -> String? {
-    //TODO
     nil
   }
   

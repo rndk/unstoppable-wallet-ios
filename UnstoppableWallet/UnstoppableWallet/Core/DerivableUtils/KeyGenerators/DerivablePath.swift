@@ -7,15 +7,6 @@ public struct DerivablePath: Hashable, Codable {
     case bip44
     case deprecated
     
-//    var prefix: String {
-//      switch self {
-//      case .deprecated:
-//        return "m/19165'"
-//      case .bip44, .bip44Change:
-//        return "m/44'/19165'"
-//      }
-//    }
-    
     var prefix: String {
       switch self {
       case .deprecated:
@@ -31,7 +22,12 @@ public struct DerivablePath: Hashable, Codable {
   public let coinId: Int
   public let accountIndex: Int?
   
-  public init(type: DerivablePath.DerivableType, coinId: Int, walletIndex: Int, accountIndex: Int? = nil) {
+  public init(
+    type: DerivablePath.DerivableType,
+    coinId: Int,
+    walletIndex: Int,
+    accountIndex: Int? = nil
+  ) {
     self.type = type
     self.coinId = coinId
     self.walletIndex = walletIndex
