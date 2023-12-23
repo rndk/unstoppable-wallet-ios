@@ -3,27 +3,29 @@ import UIKit
 import MarketKit
 import StorageKit
 
-class SendSafeCoinModule {
+class SendDerivableCoinModule {
   static func viewController(
     token: Token,
     mode: SendBaseService.Mode,
-    adapter: ISendSafeCoinAdapter
+    adapter: ISendDerivableCoinAdapter
   ) -> UIViewController? {
     
-    let safeCoinAddressParserItem = SafeCoinAddressParser()
+    let safeCoinAddressParserItem = DerivableCoinAddressParser()
     let addressParserChain = AddressParserChain().append(handler: safeCoinAddressParserItem)
     
     let addressService = AddressService(
-      mode: .parsers(AddressParserFactory.parser(blockchainType: .safeCoin), addressParserChain),
+//      mode: .parsers(AddressParserFactory.parser(blockchainType: .safeCoin), addressParserChain), //TODO TEST
+      mode: .parsers(AddressParserFactory.parser(blockchainType: token.blockchainType), addressParserChain),
       marketKit: App.shared.marketKit,
       contactBookManager: App.shared.contactManager,
-      blockchainType: .safeCoin
+//      blockchainType: .safeCoin //TODO TEST
+      blockchainType: token.blockchainType
     )
     
-    let service = SendSafeCoinService(
+    let service = SendDerivableCoinService(
       token: token,
       mode: mode,
-      adapter: adapter as! SafeCoinAdapter,
+      adapter: adapter as! DerivableCoinAdapter,
       addressService: addressService
     )
     let switchService = AmountTypeSwitchService(localStorage: StorageKit.LocalStorage.default)
@@ -41,7 +43,7 @@ class SendSafeCoinModule {
       marketKit: App.shared.marketKit
     )
     
-    let viewModel = SendSafeCoinViewModel(service: service)
+    let viewModel = SendDerivableCoinViewModel(service: service)
     let availableBalanceViewModel = SendAvailableBalanceViewModel(
       service: service,
       coinService: coinService,
@@ -56,14 +58,14 @@ class SendSafeCoinModule {
     )
     addressService.amountPublishService = amountViewModel
     
-    let recipientViewModel = SafeCoinRecipientAddressViewModel(
+    let recipientViewModel = DerivableCoinRecipientAddressViewModel(
       service: addressService,
       handlerDelegate: nil,
       sendService: service
     )
     
-    let viewController = SendSafeCoinViewController(
-      safeCoinKitWrapper: (adapter as! SafeCoinAdapter).wrapper,
+    let viewController = SendDerivableCoinViewController(
+      coinKitWrapper: (adapter as! DerivableCoinAdapter).wrapper,
       viewModel: viewModel,
       availableBalanceViewModel: availableBalanceViewModel,
       amountViewModel: amountViewModel,

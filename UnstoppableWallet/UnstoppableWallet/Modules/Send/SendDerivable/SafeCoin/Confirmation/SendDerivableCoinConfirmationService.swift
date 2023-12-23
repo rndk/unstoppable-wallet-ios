@@ -5,12 +5,13 @@ import BigInt
 import HsExtensions
 import Combine
 
-class SendSafeCoinConfirmationService {
+class SendDerivableCoinConfirmationService {
   private var tasks = Set<AnyTask>()
   
-  private let safeCoinDecimals = Decimal(1_000_000_000)
+  //TODO возможно тут придется передавать Token, чтоб взять из него decimals
+  private let coinDecimals = Decimal(1_000_000_000)
   private let feeService: SendFeeService
-  private let safeCoinKitWrapper: DerivableCoinKitWrapper
+  private let coinKitWrapper: DerivableCoinKitWrapper
   private let evmLabelManager: EvmLabelManager
   private let sendAddress: Address?
   
@@ -37,7 +38,7 @@ class SendSafeCoinConfirmationService {
     }
   }
   
-  private(set) var sendData: SendSafeCoinService.SendData
+  private(set) var sendData: SendDerivableCoinService.SendData
   private(set) var dataState: DataState
   
   private let sendStateRelay = PublishRelay<SendState>()
@@ -48,43 +49,43 @@ class SendSafeCoinConfirmationService {
   }
   
   init(
-    sendData: SendSafeCoinService.SendData,
-    safeCoinKitWrapper: DerivableCoinKitWrapper,
+    sendData: SendDerivableCoinService.SendData,
+    coinKitWrapper: DerivableCoinKitWrapper,
     feeService: SendFeeService,
     evmLabelManager: EvmLabelManager
   ) {
     self.sendData = sendData
-    self.safeCoinKitWrapper = safeCoinKitWrapper
+    self.coinKitWrapper = coinKitWrapper
     self.feeService = feeService
     self.evmLabelManager = evmLabelManager
     
     dataState = DataState(sendData: sendData)
-    sendAddress = sendData.addressData.safeCoinAddress
+    sendAddress = sendData.addressData.coinAddress
     feeService.feeValueService = self
     prepareTransaction()
     syncAddress()
   }
   
-  private var safeCoinKit: DerivableCoinKit {
-    safeCoinKitWrapper.coinKit
+  private var coinKit: DerivableCoinKit {
+    coinKitWrapper.coinKit
   }
   
   private func prepareTransaction() {
-    Task { [weak self, safeCoinKit, sendData] in
+    Task { [weak self, coinKit, sendData] in
       let preparedTransaction: DerivablePreparedTransaction
       
       do {
-        if safeCoinKit.balance(contractAddress: safeCoinKit.address) == self?.sendData.sendAmount {
+        if coinKit.balance(contractAddress: coinKit.address) == self?.sendData.sendAmount {
           // если нажал "отправить все", то вычисляем цену ренты аккаунта и уменьшаем отправляемую сумму?
-          let minRent = try await safeCoinKit.calcMinRent()
+          let minRent = try await coinKit.calcMinRent()
           
-          preparedTransaction = try await safeCoinKit.prepareTransaction(
-            to: sendData.addressData.safeCoinAddress.raw,
+          preparedTransaction = try await coinKit.prepareTransaction(
+            to: sendData.addressData.coinAddress.raw,
             sendAmount: sendData.sendAmount - minRent
           )
         } else {
-          preparedTransaction = try await safeCoinKit.prepareTransaction(
-            to: sendData.addressData.safeCoinAddress.raw,
+          preparedTransaction = try await coinKit.prepareTransaction(
+            to: sendData.addressData.coinAddress.raw,
             sendAmount: sendData.sendAmount
           )
         }
@@ -142,7 +143,7 @@ class SendSafeCoinConfirmationService {
     //      }
     
     //state = .ready(fees: fees)
-    feeState = .completed(Decimal(preparedTransaction.expectedFee.total) / safeCoinDecimals)
+    feeState = .completed(Decimal(preparedTransaction.expectedFee.total) / coinDecimals)
 //    state = .ready(fee: BigUInt(fee.expectedFee.total))
     state = .ready(preparedTransaction: preparedTransaction)
   }
@@ -152,7 +153,7 @@ class SendSafeCoinConfirmationService {
       return
     }
     
-    Task { [weak self, safeCoinKit] in
+    Task { [weak self, coinKit] in
       //let active = try? await tronKit.accountActive(address: sendAddress)
 //      let active = try? await safeCoinKit.accountActive(address: sendAddress) //TODO IMPLEMENT
       let active = true //remove
@@ -162,7 +163,7 @@ class SendSafeCoinConfirmationService {
   
 }
 
-extension SendSafeCoinConfirmationService: ISendXFeeValueService {
+extension SendDerivableCoinConfirmationService: ISendXFeeValueService {
   
   var feeStateObservable: Observable<DataStatus<Decimal>> {
     feeStateRelay.asObservable()
@@ -170,7 +171,7 @@ extension SendSafeCoinConfirmationService: ISendXFeeValueService {
   
 }
 
-extension SendSafeCoinConfirmationService {
+extension SendDerivableCoinConfirmationService {
   
   var stateObservable: Observable<State> {
     stateRelay.asObservable()
@@ -184,7 +185,7 @@ extension SendSafeCoinConfirmationService {
     sendAdressActiveRelay.asObservable()
   }
   
-  func getSendData() -> SendSafeCoinService.SendData {
+  func getSendData() -> SendDerivableCoinService.SendData {
     return self.sendData
   }
   
@@ -195,9 +196,9 @@ extension SendSafeCoinConfirmationService {
     
     sendState = .sending
     
-    Task { [weak self, safeCoinKitWrapper] in
+    Task { [weak self, coinKitWrapper] in
       do {
-        try await safeCoinKitWrapper.send(preparedTransaction: preparedTransaction)
+        try await coinKitWrapper.send(preparedTransaction: preparedTransaction)
         self?.sendState = .sent
         self?.refreshCoinBalance()
       } catch {
@@ -209,13 +210,13 @@ extension SendSafeCoinConfirmationService {
   func refreshCoinBalance() {
     Task {
       try await Task.sleep(nanoseconds:1_000_000_000)
-      safeCoinKitWrapper.refresh()
+      coinKitWrapper.refresh()
     }
   }
   
 }
 
-extension SendSafeCoinConfirmationService {
+extension SendDerivableCoinConfirmationService {
   
   enum State {
     case ready(preparedTransaction: DerivablePreparedTransaction)
@@ -223,7 +224,7 @@ extension SendSafeCoinConfirmationService {
   }
   
   struct DataState {
-    let sendData: SendSafeCoinService.SendData?
+    let sendData: SendDerivableCoinService.SendData?
   }
   
   enum SendState {

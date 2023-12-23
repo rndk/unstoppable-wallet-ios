@@ -5,11 +5,11 @@ import MarketKit
 import HsExtensions
 import StorageKit
 
-struct SendSafeCoinConfirmationModule {
+struct SendDerivableCoinConfirmationModule {
   
   static func viewController(
-    safeCoinKitWrapper: DerivableCoinKitWrapper,
-    sendData: SendSafeCoinService.SendData
+    coinKitWrapper: DerivableCoinKitWrapper,
+    sendData: SendDerivableCoinService.SendData
   ) -> UIViewController? {
     guard let coinServiceFactory = EvmCoinServiceFactory(
       blockchainType: .safeCoin,
@@ -32,9 +32,9 @@ struct SendSafeCoinConfirmationModule {
     )
     let feeViewModel = SendFeeViewModel(service: feeService)
     
-    let service = SendSafeCoinConfirmationService(
+    let service = SendDerivableCoinConfirmationService(
       sendData: sendData,
-      safeCoinKitWrapper: safeCoinKitWrapper,
+      coinKitWrapper: coinKitWrapper,
       feeService: feeService,
       evmLabelManager: App.shared.evmLabelManager
     )
@@ -42,13 +42,13 @@ struct SendSafeCoinConfirmationModule {
       contactManager: App.shared.contactManager,
       blockchainType: .safeCoin
     )
-    let viewModel = SendSafeCoinConfirmationViewModel(
+    let viewModel = SendDerivableCoinConfirmationViewModel(
       service: service,
       coinServiceFactory: coinServiceFactory,
       evmLabelManager: App.shared.evmLabelManager,
       contactLabelService: contactLabelService
     )
-    let controller = SendSafeCoinConfirmationViewController(
+    let controller = SendDerivableCoinConfirmationViewController(
       transactionViewModel: viewModel,
       feeViewModel: feeViewModel
     )

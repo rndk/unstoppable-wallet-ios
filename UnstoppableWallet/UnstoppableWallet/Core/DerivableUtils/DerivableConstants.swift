@@ -1,9 +1,13 @@
 import Foundation
 
 public enum DerivableConstants {
-    public static let packageDataSize: Int = 1280 - 40 - 8
-    public static let versionPrefixMask: UInt8 = 0x7F
-
-    public static let signatureLength = 64
-    public static let defaultSignature = Data(repeating: 0, count: 64)
+  public static let packageDataSize: Int = 1280 - 40 - 8
+  public static let versionPrefixMask: UInt8 = 0x7F
+  
+  public static let signatureLength = 64
+  public static let defaultSignature = Data(repeating: 0, count: 64)
+  
+  public static let safeCoinId = 19165
+  public static let solanaCoinId = 501
+  public static let suiCoinId = 784
 }

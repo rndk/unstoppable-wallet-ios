@@ -5,10 +5,10 @@ import BigInt
 import MarketKit
 import HsExtensions
 
-class SendSafeCoinConfirmationViewModel {
+class SendDerivableCoinConfirmationViewModel {
   private let disposeBag = DisposeBag()
   
-  private let service: SendSafeCoinConfirmationService
+  private let service: SendDerivableCoinConfirmationService
   private let coinServiceFactory: EvmCoinServiceFactory
   private let evmLabelManager: EvmLabelManager
   private let contactLabelService: ContactLabelService
@@ -22,10 +22,10 @@ class SendSafeCoinConfirmationViewModel {
   private let sendSuccessRelay = PublishRelay<Void>()
   private let sendFailedRelay = PublishRelay<String>()
   
-  private let feesRelay = PublishRelay<[SafeCoinFeeViewItem]>()
+  private let feesRelay = PublishRelay<[DerivableCoinFeeViewItem]>()
   
   init(
-    service: SendSafeCoinConfirmationService,
+    service: SendDerivableCoinConfirmationService,
     coinServiceFactory: EvmCoinServiceFactory,
     evmLabelManager: EvmLabelManager,
     contactLabelService: ContactLabelService
@@ -48,7 +48,7 @@ class SendSafeCoinConfirmationViewModel {
     sync(state: service.state)
   }
   
-  private func sync(state: SendSafeCoinConfirmationService.State) {
+  private func sync(state: SendDerivableCoinConfirmationService.State) {
     switch state {
     case .ready(let fee):
       feesRelay.accept(feeItems(fee: BigUInt(fee.expectedFee.total)))
@@ -102,7 +102,7 @@ class SendSafeCoinConfirmationViewModel {
     return "\(slippage)%"
   }
   
-  private func sync(sendState: SendSafeCoinConfirmationService.SendState) {
+  private func sync(sendState: SendDerivableCoinConfirmationService.SendState) {
     switch sendState {
     case .idle: ()
     case .sending: sendingRelay.accept(())
@@ -113,8 +113,8 @@ class SendSafeCoinConfirmationViewModel {
   
   //    private func feeItems(fees: [Fee]) -> [SafeCoinFeeViewItem] {
   //    private func feeItems(fees: [BigUInt]) -> [SafeCoinFeeViewItem] {
-  private func feeItems(fee: BigUInt) -> [SafeCoinFeeViewItem] {
-    var viewItems = [SafeCoinFeeViewItem]()
+  private func feeItems(fee: BigUInt) -> [DerivableCoinFeeViewItem] {
+    var viewItems = [DerivableCoinFeeViewItem]()
     let coinService = coinServiceFactory.baseCoinService
 //    var bandwidth: String?
 //    var energy: String?
@@ -145,7 +145,7 @@ class SendSafeCoinConfirmationViewModel {
     let amountData = coinService.amountData(value: BigUInt(service.getSendData().sendAmount))
     
     viewItems.append(
-      SafeCoinFeeViewItem(
+      DerivableCoinFeeViewItem(
         title: "tron.send.activation_fee".localized,
         info: "tron.send.activation_fee.info".localized,
         value1: ValueFormatter.instance.formatShort(coinValue: amountData.coinValue) ?? "n/a".localized,
@@ -170,14 +170,14 @@ class SendSafeCoinConfirmationViewModel {
   }
   
   private func items(
-    dataState: SendSafeCoinConfirmationService.DataState
+    dataState: SendDerivableCoinConfirmationService.DataState
   ) -> [SectionViewItem] {
     //if let decoration = dataState.decoration, let items = self.items(decoration: decoration, contract: dataState.contract) {
     //   return items
     //}
     
     return sendBaseCoinItems(
-      to: dataState.sendData!.addressData.safeCoinAddress,
+      to: dataState.sendData!.addressData.coinAddress,
       value: dataState.sendData!.sendAmount
     )
     
@@ -320,66 +320,19 @@ class SendSafeCoinConfirmationViewModel {
     return [SectionViewItem(viewItems: viewItems + addressActiveViewItems())]
   }
   
-//  private func eip20TransferItems(
-//    to: Address,
-//    value: BigUInt,
-////    contractAddress: TronKit.Address
-//    contractAddress: Address
-//  ) -> [SectionViewItem]? {
-//    guard let coinService = coinServiceFactory.coinService(contractAddress: contractAddress) else {
-//      return nil
-//    }
-//    
-//    var viewItems: [ViewItem] = [
-//      .subhead(
-//        iconName: "arrow_medium_2_up_right_24",
-//        title: "send.confirmation.you_send".localized,
-//        value: coinService.token.coin.name
-//      ),
-//      amountViewItem(
-//        coinService: coinService,
-//        value: value,
-//        type: .neutral
-//      )
-//    ]
-//    
-////    let addressValue = to.base58
-//    let addressValue = to.raw
-//    let addressTitle = evmLabelManager.addressLabel(address: addressValue)
-//    
-//    let contactData = contactLabelService.contactData(for: addressValue)
-//    
-//    viewItems.append(.address(
-//      title: "send.confirmation.to".localized,
-//      value: addressValue,
-//      valueTitle: addressTitle,
-//      contactAddress: contactData.contactAddress
-//    )
-//    )
-//    if let contactName = contactData.name {
-//      viewItems.append(.value(
-//        title: "send.confirmation.contact_name".localized,
-//        value: contactName,
-//        type: .regular
-//      ))
-//    }
-//    
-//    return [SectionViewItem(viewItems: viewItems + addressActiveViewItems())]
-//  }
-  
   private func coinService(token: MarketKit.Token) -> CoinService {
     coinServiceFactory.coinService(token: token)
   }
   
 }
 
-extension SendSafeCoinConfirmationViewModel {
+extension SendDerivableCoinConfirmationViewModel {
   
   var sectionViewItemsDriver: Driver<[SectionViewItem]> {
     sectionViewItemsRelay.asDriver()
   }
   
-  var feesSignal: Signal<[SafeCoinFeeViewItem]> {
+  var feesSignal: Signal<[DerivableCoinFeeViewItem]> {
     feesRelay.asSignal()
   }
   
@@ -409,7 +362,7 @@ extension SendSafeCoinConfirmationViewModel {
   
 }
 
-extension SendSafeCoinConfirmationViewModel {
+extension SendDerivableCoinConfirmationViewModel {
   
   struct SectionViewItem {
     let viewItems: [ViewItem]
@@ -429,7 +382,7 @@ extension SendSafeCoinConfirmationViewModel {
     case warning(text: String, title: String, info: String)
   }
   
-  struct SafeCoinFeeViewItem {
+  struct DerivableCoinFeeViewItem {
     let title: String
     let info: String
     let value1: String

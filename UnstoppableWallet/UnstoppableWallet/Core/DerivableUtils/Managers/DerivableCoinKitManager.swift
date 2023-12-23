@@ -51,15 +51,16 @@ class DerivableCoinKitManager {
   private func _coinKitWrapper(
     account: Account,
     blockchainType: BlockchainType,
+    derivableNetwork: DerivableCoinNetwork,
     systemProframId: PublicKey,
     tokenProgramId: PublicKey,
     associatedProgramId: PublicKey,
     sysvarRent: PublicKey,
     coinId: Int
   ) throws -> DerivableCoinKitWrapper {
-//    if let _safeCoinKitWrapper = _safeCoinKitWrapper, let currentAccount = currentAccount, currentAccount == account {
-//      return _safeCoinKitWrapper
-//    }
+    //    if let _safeCoinKitWrapper = _safeCoinKitWrapper, let currentAccount = currentAccount, currentAccount == account {
+    //      return _safeCoinKitWrapper
+    //    }
     
     if let wrp = kitMap[blockchainType], let currentAccount = currentAccount, currentAccount == account {
       return wrp
@@ -89,7 +90,7 @@ class DerivableCoinKitManager {
     let signer = DerivableCoinSigner(pair: keyPair)
     let address: String = signer.address()
     
-//    let networkUrl = self.syncSourceManager.syncSource(blockchainType: .safeCoin).link
+    //    let networkUrl = self.syncSourceManager.syncSource(blockchainType: .safeCoin).link
     let networkUrl = self.syncSourceManager.syncSource(blockchainType: blockchainType).link
     
     let coinKit = try DerivableCoinKit.instance(
@@ -98,6 +99,7 @@ class DerivableCoinKitManager {
       address: address,
       networkUrl: networkUrl,
       walletId: account.id,
+      derivableNetwork: derivableNetwork,
       accountInfoStorage: App.shared.derivableAccountStorage,
       transactionStorage: App.shared.derivableTransactionsStorage,
       syncerStorage: App.shared.derivableSyncerStorage,
@@ -111,7 +113,7 @@ class DerivableCoinKitManager {
     
     let wrapper = DerivableCoinKitWrapper(blockchainType: blockchainType, coinKit: coinKit)
     
-//    _safeCoinKitWrapper = wrapper
+    //    _safeCoinKitWrapper = wrapper
     currentAccount = account
     
     kitMap[blockchainType] = wrapper
@@ -157,6 +159,7 @@ extension DerivableCoinKitManager {
   func coinKit(
     account: Account,
     blockChainType: BlockchainType,
+    derivableNetwork: DerivableCoinNetwork,
     systemProframId: PublicKey,
     tokenProgramId: PublicKey,
     associatedProgramId: PublicKey,
@@ -167,6 +170,7 @@ extension DerivableCoinKitManager {
       try _coinKitWrapper(
         account: account,
         blockchainType: blockChainType,
+        derivableNetwork: derivableNetwork,
         systemProframId: systemProframId,
         tokenProgramId: tokenProgramId,
         associatedProgramId: associatedProgramId,

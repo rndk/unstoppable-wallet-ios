@@ -6,9 +6,9 @@ import SectionsTableView
 import RxSwift
 import RxCocoa
 
-class SendSafeCoinViewController: ThemeViewController {
-  private let safeCoinKitWrapper: DerivableCoinKitWrapper
-  private let viewModel: SendSafeCoinViewModel
+class SendDerivableCoinViewController: ThemeViewController {
+  private let coinKitWrapper: DerivableCoinKitWrapper
+  private let viewModel: SendDerivableCoinViewModel
   private let disposeBag = DisposeBag()
   
   private let iconImageView = UIImageView()
@@ -28,13 +28,13 @@ class SendSafeCoinViewController: ThemeViewController {
   private var keyboardShown = false
   
   init(
-    safeCoinKitWrapper: DerivableCoinKitWrapper,
-    viewModel: SendSafeCoinViewModel,
+    coinKitWrapper: DerivableCoinKitWrapper,
+    viewModel: SendDerivableCoinViewModel,
     availableBalanceViewModel: ISendAvailableBalanceViewModel,
     amountViewModel: AmountInputViewModel,
     recipientViewModel: RecipientAddressViewModel
   ) {
-    self.safeCoinKitWrapper = safeCoinKitWrapper
+    self.coinKitWrapper = coinKitWrapper
     self.viewModel = viewModel
     
     availableBalanceCell = SendAvailableBalanceCell(viewModel: availableBalanceViewModel)
@@ -152,16 +152,16 @@ class SendSafeCoinViewController: ThemeViewController {
     }
   }
   
-  private func openConfirm(sendData: SendSafeCoinService.SendData) {
-    print(">>> SendSafeCoinViewController openConfirm data: \(sendData.addressData.safeCoinAddress.raw) am:\(sendData.sendAmount)")
-    guard let viewController = SendSafeCoinConfirmationModule.viewController(safeCoinKitWrapper: safeCoinKitWrapper, sendData: sendData) else {
+  private func openConfirm(sendData: SendDerivableCoinService.SendData) {
+    print(">>> SendSafeCoinViewController openConfirm data: \(sendData.addressData.coinAddress.raw) am:\(sendData.sendAmount)")
+    guard let viewController = SendDerivableCoinConfirmationModule.viewController(coinKitWrapper: coinKitWrapper, sendData: sendData) else {
       return
     }
     navigationController?.pushViewController(viewController, animated: true)
   }
 }
 
-extension SendSafeCoinViewController: SectionsDataSource {
+extension SendDerivableCoinViewController: SectionsDataSource {
 
     func buildSections() -> [SectionProtocol] {
         var sections = [

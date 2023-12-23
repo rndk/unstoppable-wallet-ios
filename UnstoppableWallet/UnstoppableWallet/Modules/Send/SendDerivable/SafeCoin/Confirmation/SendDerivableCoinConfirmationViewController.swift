@@ -8,10 +8,10 @@ import ComponentKit
 import Foundation
 import MarketKit
 
-class SendSafeCoinConfirmationViewController: ThemeViewController {
+class SendDerivableCoinConfirmationViewController: ThemeViewController {
   let disposeBag = DisposeBag()
 
-  let transactionViewModel: SendSafeCoinConfirmationViewModel
+  let transactionViewModel: SendDerivableCoinConfirmationViewModel
   let feeViewModel: SendFeeViewModel
 
   private let tableView = SectionsTableView(style: .grouped)
@@ -20,12 +20,12 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
   private let sendButton = SliderButton()
   private let feeCell: FeeCell
 
-  private var sectionViewItems = [SendSafeCoinConfirmationViewModel.SectionViewItem]()
-  private var feeViewItems = [SendSafeCoinConfirmationViewModel.SafeCoinFeeViewItem]()
+  private var sectionViewItems = [SendDerivableCoinConfirmationViewModel.SectionViewItem]()
+  private var feeViewItems = [SendDerivableCoinConfirmationViewModel.DerivableCoinFeeViewItem]()
   private let cautionCell = TitledHighlightedDescriptionCell()
   private var isLoaded = false
 
-  init(transactionViewModel: SendSafeCoinConfirmationViewModel, feeViewModel: SendFeeViewModel) {
+  init(transactionViewModel: SendDerivableCoinConfirmationViewModel, feeViewModel: SendFeeViewModel) {
       self.transactionViewModel = transactionViewModel
       self.feeViewModel = feeViewModel
 
@@ -99,7 +99,7 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
       reloadTable()
   }
 
-  private func handleFeeItems(items: [SendSafeCoinConfirmationViewModel.SafeCoinFeeViewItem]) {
+  private func handleFeeItems(items: [SendDerivableCoinConfirmationViewModel.DerivableCoinFeeViewItem]) {
     print(">>> SafeCoinConfirViewController \(items.count)")
       self.feeViewItems = items
       reloadTable()
@@ -136,7 +136,7 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
   }
 
   private func row(
-    viewItem: SendSafeCoinConfirmationViewModel.ViewItem,
+    viewItem: SendDerivableCoinConfirmationViewModel.ViewItem,
     rowInfo: RowInfo
   ) -> RowProtocol {
       switch viewItem {
@@ -198,7 +198,7 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
   }
 
   private func section(
-    sectionViewItem: SendSafeCoinConfirmationViewModel.SectionViewItem,
+    sectionViewItem: SendDerivableCoinConfirmationViewModel.SectionViewItem,
     index: Int
   ) -> SectionProtocol {
       return Section(
@@ -250,7 +250,7 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
   private func doubleAmountRow(
     tableView: SectionsTableView,
     rowInfo: RowInfo,
-    item: SendSafeCoinConfirmationViewModel.SafeCoinFeeViewItem
+    item: SendDerivableCoinConfirmationViewModel.DerivableCoinFeeViewItem
   ) -> RowProtocol {
       let value2Font: UIFont = item.value2IsSecondary ? .caption : .subhead2
       let value2Color: UIColor = item.value2IsSecondary ? .themeGray : .themeLeah
@@ -294,7 +294,7 @@ class SendSafeCoinConfirmationViewController: ThemeViewController {
 
 }
 
-extension SendSafeCoinConfirmationViewController: SectionsDataSource {
+extension SendDerivableCoinConfirmationViewController: SectionsDataSource {
 
   func buildSections() -> [SectionProtocol] {
       let transactionSections: [SectionProtocol] = sectionViewItems.enumerated().map { index, sectionViewItem in

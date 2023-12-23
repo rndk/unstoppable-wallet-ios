@@ -4,16 +4,16 @@ import RxRelay
 import RxSwift
 import MarketKit
 
-class SendSafeCoinViewModel {
-  private let service: SendSafeCoinService
+class SendDerivableCoinViewModel {
+  private let service: SendDerivableCoinService
   private let disposeBag = DisposeBag()
   
   private let proceedEnabledRelay = BehaviorRelay<Bool>(value: false)
   private let amountCautionRelay = BehaviorRelay<Caution?>(value: nil)
   private let addressCautionRelay = BehaviorRelay<Caution?>(value: nil)
-  private let proceedRelay = PublishRelay<SendSafeCoinService.SendData>()
+  private let proceedRelay = PublishRelay<SendDerivableCoinService.SendData>()
   
-  init(service: SendSafeCoinService) {
+  init(service: SendDerivableCoinService) {
     self.service = service
     
     subscribe(disposeBag, service.stateObservable) { [weak self] in self?.sync(state: $0) }
@@ -23,7 +23,7 @@ class SendSafeCoinViewModel {
     sync(state: service.state)
   }
   
-  private func sync(state: SendSafeCoinService.State) {
+  private func sync(state: SendDerivableCoinService.State) {
     if case .ready = state {
       proceedEnabledRelay.accept(true)
     } else {
@@ -31,7 +31,7 @@ class SendSafeCoinViewModel {
     }
   }
   
-  private func sync(amountCaution: (error: Error?, warning: SendSafeCoinService.AmountWarning?)) {
+  private func sync(amountCaution: (error: Error?, warning: SendDerivableCoinService.AmountWarning?)) {
     var caution: Caution? = nil
     
     if let error = amountCaution.error {
@@ -57,7 +57,7 @@ class SendSafeCoinViewModel {
   
 }
 
-extension SendSafeCoinViewModel {
+extension SendDerivableCoinViewModel {
   
   var title: String {
     switch service.mode {
@@ -85,7 +85,7 @@ extension SendSafeCoinViewModel {
     addressCautionRelay.asDriver()
   }
   
-  var proceedSignal: Signal<SendSafeCoinService.SendData> {
+  var proceedSignal: Signal<SendDerivableCoinService.SendData> {
     proceedRelay.asSignal()
   }
   
@@ -103,7 +103,7 @@ extension SendSafeCoinViewModel {
   
 }
 
-extension SendSafeCoinService.AmountError: LocalizedError {
+extension SendDerivableCoinService.AmountError: LocalizedError {
   
   var errorDescription: String? {
     switch self {
@@ -114,7 +114,7 @@ extension SendSafeCoinService.AmountError: LocalizedError {
   
 }
 
-extension SendSafeCoinService.AddressError: LocalizedError {
+extension SendDerivableCoinService.AddressError: LocalizedError {
   
   var errorDescription: String? {
     switch self {

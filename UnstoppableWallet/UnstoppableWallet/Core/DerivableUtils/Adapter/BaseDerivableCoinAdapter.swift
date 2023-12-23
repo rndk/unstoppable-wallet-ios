@@ -1,14 +1,14 @@
 import Foundation
 import BigInt
 
-class BaseSafeCoinAdapter {
+class BaseDerivableCoinAdapter {
   static let confirmationsThreshold = 18
   let decimals: Int = 9
   
   let wrapper: DerivableCoinKitWrapper
   
-  init(safeCoinKitWrapper: DerivableCoinKitWrapper) {
-    self.wrapper = safeCoinKitWrapper
+  init(coinKitWrapper: DerivableCoinKitWrapper) {
+    self.wrapper = coinKitWrapper
   }
   
   var kit: DerivableCoinKit {
@@ -19,8 +19,8 @@ class BaseSafeCoinAdapter {
     kit.isMainNet()
   }
   
-  func convertToAdapterState(safeCoinSyncState: DerivableCoinSyncState) -> AdapterState {
-    switch safeCoinSyncState {
+  func convertToAdapterState(coinSyncState: DerivableCoinSyncState) -> AdapterState {
+    switch coinSyncState {
     case .synced: return .synced
     case .notSynced(let error): return .notSynced(error: error.convertedError)
     case .syncing: return .syncing(progress: nil, lastBlockDate: nil)
@@ -48,7 +48,7 @@ class BaseSafeCoinAdapter {
   
 }
 
-extension BaseSafeCoinAdapter: IDepositAdapter {
+extension BaseDerivableCoinAdapter: IDepositAdapter {
   
   var receiveAddress: DepositAddress {
     ActivatedDepositAddress(

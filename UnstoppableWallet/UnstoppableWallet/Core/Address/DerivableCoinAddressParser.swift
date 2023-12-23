@@ -1,7 +1,7 @@
 import Foundation
 import RxSwift
 
-class SafeCoinAddressParser {
+class DerivableCoinAddressParser {
   
   private func validate(address: String) -> Single<Address> {
     do {
@@ -14,7 +14,7 @@ class SafeCoinAddressParser {
   
 }
 
-extension SafeCoinAddressParser: IAddressParserItem {
+extension DerivableCoinAddressParser: IAddressParserItem {
   func handle(address: String) -> Single<Address> {
     validate(address: address)
   }

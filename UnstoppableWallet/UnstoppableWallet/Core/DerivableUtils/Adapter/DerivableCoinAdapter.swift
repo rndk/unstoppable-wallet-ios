@@ -1,11 +1,11 @@
 import Foundation
 import RxSwift
 
-class SafeCoinAdapter: BaseSafeCoinAdapter {
+class DerivableCoinAdapter: BaseDerivableCoinAdapter {
   static let decimals = 9
   
-  override init(safeCoinKitWrapper: DerivableCoinKitWrapper) {
-    super.init(safeCoinKitWrapper: safeCoinKitWrapper)
+  override init(coinKitWrapper: DerivableCoinKitWrapper) {
+    super.init(coinKitWrapper: coinKitWrapper)
   }
 }
 
@@ -16,7 +16,7 @@ class SafeCoinAdapter: BaseSafeCoinAdapter {
 //}
 
 // IAdapter
-extension SafeCoinAdapter: IAdapter {
+extension DerivableCoinAdapter: IAdapter {
   var statusInfo: [(String, Any)] {
     []
   }
@@ -38,14 +38,14 @@ extension SafeCoinAdapter: IAdapter {
   }
 }
 
-extension SafeCoinAdapter: IBalanceAdapter {
+extension DerivableCoinAdapter: IBalanceAdapter {
   var balanceState: AdapterState {
-    convertToAdapterState(safeCoinSyncState: kit.syncState)
+    convertToAdapterState(coinSyncState: kit.syncState)
   }
   
   var balanceStateUpdatedObservable: Observable<AdapterState> {
     kit.syncStatePublisher.asObservable().map { [weak self] in
-      self?.convertToAdapterState(safeCoinSyncState: $0) ?? .syncing(progress: nil, lastBlockDate: nil)
+      self?.convertToAdapterState(coinSyncState: $0) ?? .syncing(progress: nil, lastBlockDate: nil)
     }
   }
   
@@ -61,7 +61,7 @@ extension SafeCoinAdapter: IBalanceAdapter {
   
 }
 
-extension SafeCoinAdapter: ISendSafeCoinAdapter {
+extension DerivableCoinAdapter: ISendDerivableCoinAdapter {
   func validate(address: String) throws {
     //TODO validate address
   }

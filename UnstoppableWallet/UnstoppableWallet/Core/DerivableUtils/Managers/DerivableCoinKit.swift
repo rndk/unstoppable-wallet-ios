@@ -12,20 +12,22 @@ public class DerivableCoinKit {
   private let transactionSender: DerivableCoinTransactionSender
   private let feeProvider: DerivableCoinFeeProvider
   
+  public let address: String
+  public let blockchainUid: String
+  public var networkUrl: String
+  public var derivableNetwork: DerivableCoinNetwork
+  
   private let systemProframId: PublicKey
   private let tokenProgramId: PublicKey
   private let associatedProgramId: PublicKey
   private let sysvarRent: PublicKey
-  
-  public let address: String
-  public let blockchainUid: String
-  public var networkUrl: String
   
   
   init(
     blockchainUid: String,
     address: String,
     networkUrl: String,
+    derivableNetwork: DerivableCoinNetwork,
     syncer: DerivableCoinSyncer,
     accountInfoManager: DerivableCoinAccountInfoManager,
     transactionManager: DerivableCoinTransactionManager,
@@ -41,6 +43,7 @@ public class DerivableCoinKit {
     self.address = address
     self.blockchainUid = blockchainUid
     self.networkUrl = networkUrl
+    self.derivableNetwork = derivableNetwork
     self.accountInfoManager = accountInfoManager
     self.transactionManager = transactionManager
     self.transactionSender = transactionSender
@@ -63,8 +66,7 @@ public class DerivableCoinKit {
 extension DerivableCoinKit {
   
   func isMainNet() -> Bool {
-    //TODO надо сделать интерфейс
-    SafeCoinNetwork.isMainNet(source: self.networkUrl)
+    self.derivableNetwork.isMainNet(source: self.networkUrl)
   }
   
   public var lastBlockHeight: Int? {
@@ -163,6 +165,7 @@ extension DerivableCoinKit {
     address: String,
     networkUrl: String,
     walletId: String,
+    derivableNetwork: DerivableCoinNetwork,
     accountInfoStorage: DerivableCoinAccountInfoStorage,
     transactionStorage: DerivableCoinTransactionStorage,
     syncerStorage: DerivableCoinSyncerStorage,
@@ -216,6 +219,7 @@ extension DerivableCoinKit {
       blockchainUid: blockchainUid,
       address: address,
       networkUrl: networkUrl,
+      derivableNetwork: derivableNetwork,
       syncer: syncer,
       accountInfoManager: accountInfoManager,
       transactionManager: transactionManager,

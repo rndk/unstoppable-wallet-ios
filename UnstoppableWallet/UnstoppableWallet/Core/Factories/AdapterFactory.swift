@@ -74,22 +74,28 @@ class AdapterFactory {
         return nil
     }
   
+    private func solanaAdapter(wallet: Wallet) -> IAdapter? {
+        //TODO
+        return nil
+    }
+  
     private func safeCoinAdapter(wallet: Wallet) -> IAdapter? {
         print(">>> ADAPTERFACTORY safeCoinAdapter()... \(wallet)") //TODO remove
         guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
           account: wallet.account,
           blockChainType: .safeCoin,
+          derivableNetwork: SafeCoinNetwork(),
           systemProframId: SafeCoinTokenProgram.systemProgramId,
           tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
           associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
           sysvarRent: SafeCoinTokenProgram.sysvarRent,
-          coinId: 19165
+          coinId: DerivableConstants.safeCoinId
         ) else {
             print(">>> ADAPTERFACTORY safeCoinAdapter() error -> return nil...") //TODO remove
             return nil
         }
         
-        return SafeCoinAdapter(safeCoinKitWrapper: safeCoinKitWrapper)
+        return DerivableCoinAdapter(coinKitWrapper: safeCoinKitWrapper)
     }
 
 }
@@ -126,7 +132,7 @@ extension AdapterFactory {
     func safeCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
       if let safeCoinKitWrapper = derivableCoinKitManager.coinKit(blockchainType: .safeCoin) {
         print(">>> AdapterFactory return non nil SafeCoinTransactionsAdapter")
-        return SafeCoinTransactionsAdapter(safeCoinKitWrapper: safeCoinKitWrapper)
+        return DerivableCoinTransactionsAdapter(coinKitWrapper: safeCoinKitWrapper)
       }
       return nil
     }
@@ -182,6 +188,9 @@ extension AdapterFactory {
 //        case (.native, .safeCoin):
         case (_, .safeCoin):
             return safeCoinAdapter(wallet: wallet)
+          
+//        case (_, .solana):
+//            return solanaAdapter(wallet: wallet)
 
         default: ()
         }

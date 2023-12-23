@@ -5,12 +5,12 @@ import RxRelay
 import BigInt
 import HsExtensions
 
-class SendSafeCoinService {
+class SendDerivableCoinService {
   let sendToken: Token
   let mode: SendBaseService.Mode
   
   private let disposeBag = DisposeBag()
-  private let adapter: SafeCoinAdapter
+  private let adapter: DerivableCoinAdapter
   private let addressService: AddressService
   
   private let stateRelay = PublishRelay<State>()
@@ -20,7 +20,7 @@ class SendSafeCoinService {
     }
   }
   
-  private var safeCoinAmount: BigUInt?
+  private var coinAmount: BigUInt?
   private var addressData: AddressData?
   
   private let amountCautionRelay = PublishRelay<(error: Error?, warning: AmountWarning?)>()
@@ -42,10 +42,10 @@ class SendSafeCoinService {
   init(
     token: Token,
     mode: SendBaseService.Mode,
-    adapter: SafeCoinAdapter,
+    adapter: DerivableCoinAdapter,
     addressService: AddressService
   ) {
-    sendToken = token
+    self.sendToken = token
     self.mode = mode
     self.adapter = adapter
     self.addressService = addressService
@@ -63,8 +63,8 @@ class SendSafeCoinService {
     case .success(let address):
       do {
         //addressData = AddressData(tronAddress: try TronKit.Address(address: address.raw), domain: address.domain)
-        //let addressString = try! PublicKey(string: address.raw)
-        addressData = AddressData(safeCoinAddress: Address(raw: address.raw), domain: address.domain)
+//        _ = try PublicKey(string: address.raw) //TODO было закомменчено, если что - снова закомменть
+        addressData = AddressData(coinAddress: Address(raw: address.raw), domain: address.domain)
       } catch {
         addressData = nil
       }
@@ -77,18 +77,16 @@ class SendSafeCoinService {
   private func syncState() {
     if amountCaution.error == nil,
        case .success = addressService.state,
-       let sendAmount = safeCoinAmount,
+       let sendAmount = coinAmount,
        let addressData = addressData {
-      //let contract = adapter.contract(amount: tronAmount, address: addressData.tronAddress)
-      //state = .ready(contract: contract)
       state = .ready(sendData: SendData(addressData: addressData, sendAmount: sendAmount))
     } else {
       state = .notReady
     }
   }
   
-  private func validSafeCoinAmount(amount: Decimal) throws -> BigUInt {
-    guard let safeCoinAmount = BigUInt(amount.hs.roundedString(decimal: sendToken.decimals)) else {
+  private func validCoinAmount(amount: Decimal) throws -> BigUInt {
+    guard let derivableCoinAmount = BigUInt(amount.hs.roundedString(decimal: sendToken.decimals)) else {
       throw AmountError.invalidDecimal
     }
     
@@ -96,12 +94,12 @@ class SendSafeCoinService {
       throw AmountError.insufficientBalance
     }
     
-    return safeCoinAmount
+    return derivableCoinAmount
   }
   
 }
 
-extension SendSafeCoinService {
+extension SendDerivableCoinService {
   
   var stateObservable: Observable<State> {
     stateRelay.asObservable()
@@ -121,7 +119,7 @@ extension SendSafeCoinService {
   
 }
 
-extension SendSafeCoinService: IAvailableBalanceService {
+extension SendDerivableCoinService: IAvailableBalanceService {
   
   var availableBalance: DataStatus<Decimal> {
     .completed(adapter.balanceData.available)
@@ -133,7 +131,7 @@ extension SendSafeCoinService: IAvailableBalanceService {
   
 }
 
-extension SendSafeCoinService: IAmountInputService {
+extension SendDerivableCoinService: IAmountInputService {
   
   var amount: Decimal {
     0
@@ -162,7 +160,7 @@ extension SendSafeCoinService: IAmountInputService {
   func onChange(amount: Decimal) {
     if amount > 0 {
       do {
-        safeCoinAmount = try validSafeCoinAmount(amount: amount)
+        coinAmount = try validCoinAmount(amount: amount)
         
         var amountWarning: AmountWarning? = nil
         if amount.isEqual(to: adapter.balanceData.available) {
@@ -174,11 +172,11 @@ extension SendSafeCoinService: IAmountInputService {
         
         amountCaution = (error: nil, warning: amountWarning)
       } catch {
-        safeCoinAmount = nil
+        coinAmount = nil
         amountCaution = (error: error, warning: nil)
       }
     } else {
-      safeCoinAmount = nil
+      coinAmount = nil
       amountCaution = (error: nil, warning: nil)
     }
     
@@ -186,9 +184,9 @@ extension SendSafeCoinService: IAmountInputService {
   }
   
   func sync(address: String) {
-    let safeCoinAddress = Address(raw: address.trimmingCharacters(in: .whitespacesAndNewlines))
+    let coinAddress = Address(raw: address.trimmingCharacters(in: .whitespacesAndNewlines))
     
-    guard safeCoinAddress.raw != adapter.wrapper.coinKit.receiveAddress else {
+    guard coinAddress.raw != adapter.wrapper.coinKit.receiveAddress else {
       state = .notReady
       addressError = AddressError.ownAddress
       return
@@ -197,7 +195,7 @@ extension SendSafeCoinService: IAmountInputService {
     Single<Bool>
       .create { [weak self] observer in
         let task = Task { [weak self] in
-          let active = self?.adapter.accountActive(address: safeCoinAddress.raw) ?? false
+          let active = self?.adapter.accountActive(address: coinAddress.raw) ?? false
           observer(.success(active))
         }
         
@@ -215,7 +213,7 @@ extension SendSafeCoinService: IAmountInputService {
   
 }
 
-extension SendSafeCoinService {
+extension SendDerivableCoinService {
   
   enum State {
     case ready(sendData: SendData)
@@ -237,12 +235,12 @@ extension SendSafeCoinService {
   }
   
   struct AddressData {
-    let safeCoinAddress: Address
+    let coinAddress: Address
     let domain: String?
   }
   
   struct SendData {
-    let addressData: SendSafeCoinService.AddressData
+    let addressData: SendDerivableCoinService.AddressData
     var sendAmount: BigUInt
     
     mutating func updateAmount(newAmount: BigUInt) {

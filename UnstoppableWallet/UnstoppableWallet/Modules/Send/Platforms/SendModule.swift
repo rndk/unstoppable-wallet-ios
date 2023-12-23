@@ -17,7 +17,7 @@ class SendModule {
 
         let token = wallet.token
       print(">>> SendModule token: \(token.coin), adapter type: \(type(of: adapter))")
-      //TODO тут надо создать адаптер для сейфкоина
+      //TODO тут надо создать адаптер для деривативных типов
 
         switch adapter {
         case let adapter as ISendBitcoinAdapter:
@@ -30,8 +30,8 @@ class SendModule {
             return SendEvmModule.viewController(token: token, mode: mode, adapter: adapter)
         case let adapter as ISendTronAdapter:
             return SendTronModule.viewController(token: token, mode: mode, adapter: adapter)
-        case let adapter as ISendSafeCoinAdapter:
-            return SendSafeCoinModule.viewController(token: token, mode: mode, adapter: adapter)
+        case let adapter as ISendDerivableCoinAdapter:
+            return SendDerivableCoinModule.viewController(token: token, mode: mode, adapter: adapter)
         default: return nil
         }
     }

@@ -4,33 +4,34 @@ import BigInt
 import HsToolKit
 import MarketKit
 
-class SafeCoinTransactionsAdapter: BaseSafeCoinAdapter {
+class DerivableCoinTransactionsAdapter: BaseDerivableCoinAdapter {
   
-  override init(
-    safeCoinKitWrapper: DerivableCoinKitWrapper
-  ) {
-    super.init(safeCoinKitWrapper: safeCoinKitWrapper)
-    //
+  private let blockchainType: BlockchainType
+  
+  override init(coinKitWrapper: DerivableCoinKitWrapper) {
+    self.blockchainType = coinKitWrapper.blockchainType
+    super.init(coinKitWrapper: coinKitWrapper)
   }
   
-  private func convert(safeCoinTransaction: DerivableCoinTransaction) -> TransactionRecord? {
+  private func convert(coinTransaction: DerivableCoinTransaction) -> TransactionRecord? {
     //TODO проверить все ли тут правильно, возможно в транзакцию надо пихать больше данных
     return TransactionRecord(
 //      source: TransactionSource(blockchainType: BlockchainType(uid: "safe-coin-2"), meta: nil),
-      source: TransactionSource(blockchainType: BlockchainType(uid: BlockchainType.safeCoin.uid), meta: nil),
-      uid: safeCoinTransaction.hash,
-      transactionHash: safeCoinTransaction.hash,
+//      source: TransactionSource(blockchainType: BlockchainType(uid: BlockchainType.safeCoin.uid), meta: nil),
+      source: TransactionSource(blockchainType: BlockchainType(uid: self.blockchainType.uid), meta: nil),
+      uid: coinTransaction.hash,
+      transactionHash: coinTransaction.hash,
       transactionIndex: 0,
       blockHeight: nil,
       confirmationsThreshold: nil,
-      date: Date(timeIntervalSince1970: Double(safeCoinTransaction.blockTime / 1000)),
-      failed: safeCoinTransaction.isFailed
+      date: Date(timeIntervalSince1970: Double(coinTransaction.blockTime / 1000)),
+      failed: coinTransaction.isFailed
     )
   }
   
 }
 
-extension SafeCoinTransactionsAdapter: ITransactionsAdapter {
+extension DerivableCoinTransactionsAdapter: ITransactionsAdapter {
   func explorerUrl(transactionHash: String) -> String? {
     //TODO тут надо урл эксплорера в зависимости от блокчейна
     kit.networkUrl
@@ -69,7 +70,7 @@ extension SafeCoinTransactionsAdapter: ITransactionsAdapter {
     )
     .asObservable()
     .map { [weak self] in
-      $0.compactMap { self?.convert(safeCoinTransaction: $0) }
+      $0.compactMap { self?.convert(coinTransaction: $0) }
     }
   }
   
@@ -86,7 +87,7 @@ extension SafeCoinTransactionsAdapter: ITransactionsAdapter {
       filter: filter,
       limit: limit
     )
-    return Single.just(transactions.compactMap { self.convert(safeCoinTransaction: $0) })
+    return Single.just(transactions.compactMap { self.convert(coinTransaction: $0) })
   }
  
   func rawTransaction(hash: String) -> String? {
