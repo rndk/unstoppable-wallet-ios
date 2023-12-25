@@ -58,9 +58,6 @@ enum AccountType {
     }
 
     func supports(token: Token) -> Bool {
-      if (token.coin.uid.contains("sui") || token.coin.uid.contains("safe-coin")) {
-        print("AccountType supports \(token)")
-      }
         switch self {
         case .mnemonic:
             switch (token.blockchainType, token.type) {
@@ -82,6 +79,7 @@ enum AccountType {
             case (.tron, .native), (.tron, .eip20): return true
             case (.sui, _): return true
             case (.safeCoin, _): return true
+            case (.solana, .native): return true
             default: return false
             }
         case let .hdExtendedKey(key):

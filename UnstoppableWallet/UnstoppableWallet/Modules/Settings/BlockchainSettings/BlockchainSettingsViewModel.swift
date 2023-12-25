@@ -27,6 +27,7 @@ class BlockchainSettingsViewModel: ObservableObject {
     
     subscribe(disposeBag, btcBlockchainManager.restoreModeUpdatedObservable) { [weak self] _ in self?.syncBtcItems() }
     subscribe(disposeBag, evmSyncSourceManager.syncSourceObservable) { [weak self] _ in self?.syncEvmItems() }
+    subscribe(disposeBag, derivableSyncSourceManager.syncSourceObservable) { [weak self] _ in self?.syncDerivableItems() }
     
     syncBtcItems()
     syncEvmItems()

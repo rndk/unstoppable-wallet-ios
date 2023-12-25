@@ -7,38 +7,49 @@ import MarketKit
 class DerivableCoinTransactionsAdapter: BaseDerivableCoinAdapter {
   
   private let blockchainType: BlockchainType
+  private let baseToken: Token
+  private let transactionSource: TransactionSource
+  private let converter: DerivableTransactionConverter
   
-  override init(coinKitWrapper: DerivableCoinKitWrapper) {
+  init(coinKitWrapper: DerivableCoinKitWrapper, transactionSource: TransactionSource, baseToken: Token) {
+//    super.init(coinKitWrapper: coinKitWrapper)
     self.blockchainType = coinKitWrapper.blockchainType
+    self.transactionSource = transactionSource
+    self.baseToken = baseToken
+    
+    self.converter = DerivableTransactionConverter(
+      selfAddress: coinKitWrapper.coinKit.address,
+      source: transactionSource,
+      baseToken: baseToken
+    )
+    
     super.init(coinKitWrapper: coinKitWrapper)
   }
   
   private func convert(coinTransaction: DerivableCoinTransaction) -> TransactionRecord? {
-    //TODO проверить все ли тут правильно, возможно в транзакцию надо пихать больше данных
-    return TransactionRecord(
-//      source: TransactionSource(blockchainType: BlockchainType(uid: "safe-coin-2"), meta: nil),
-//      source: TransactionSource(blockchainType: BlockchainType(uid: BlockchainType.safeCoin.uid), meta: nil),
-      source: TransactionSource(blockchainType: BlockchainType(uid: self.blockchainType.uid), meta: nil),
-      uid: coinTransaction.hash,
-      transactionHash: coinTransaction.hash,
-      transactionIndex: 0,
-      blockHeight: nil,
-      confirmationsThreshold: nil,
-      date: Date(timeIntervalSince1970: Double(coinTransaction.blockTime / 1000)),
-      failed: coinTransaction.isFailed
-    )
+    converter.convert(coinTransaction: coinTransaction)
   }
   
 }
 
 extension DerivableCoinTransactionsAdapter: ITransactionsAdapter {
   func explorerUrl(transactionHash: String) -> String? {
-    //TODO тут надо урл эксплорера в зависимости от блокчейна
-    kit.networkUrl
+    let url = switch blockchainType {
+    case .safeCoin: "https://explorer.safecoin.org/tx/\(transactionHash)"
+    case .solana: "https://explorer.solana.com/tx/\(transactionHash)"
+    default: ""
+    }
+    return url
   }
   
   var explorerTitle: String {
-    "SafeCoinExplorer"
+    let title: String
+    switch blockchainType{
+    case .safeCoin: title = "SafecoinExplorer"
+    case .solana: title = "SolanaExplorer"
+    default: title = "Explorer"
+    }
+    return title
   }
   
   var syncing: Bool {
@@ -50,12 +61,10 @@ extension DerivableCoinTransactionsAdapter: ITransactionsAdapter {
   }
   
   var lastBlockInfo: LastBlockInfo? {
-    print(">>> SafeCoinTransactionsAdapter lastBlockInfo")
     return kit.lastBlockHeight.map { LastBlockInfo(height: $0, timestamp: nil) }
   }
   
   var lastBlockUpdatedObservable: RxSwift.Observable<Void> {
-    print(">>> SafeCoinTransactionsAdapter lastBlockUpdatedObservable")
     return kit.lastBlockHeightPublisher.asObservable().map { _ in () }
   }
   
@@ -63,7 +72,6 @@ extension DerivableCoinTransactionsAdapter: ITransactionsAdapter {
     token: MarketKit.Token?,
     filter: TransactionTypeFilter
   ) -> RxSwift.Observable<[TransactionRecord]> {
-    print(">>> SafeCoinTransactionsAdapter transactionsObservable()")
     return kit.transactionsPublisher(
       token: token,
       filter: filter
@@ -80,7 +88,6 @@ extension DerivableCoinTransactionsAdapter: ITransactionsAdapter {
     filter: TransactionTypeFilter,
     limit: Int
   ) -> RxSwift.Single<[TransactionRecord]> {
-    print(">>> SafeCoinTransactionsAdapter transactionsSingle()")
     let transactions = kit.transactions(
       from: from,
       token: token,

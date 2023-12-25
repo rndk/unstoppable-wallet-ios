@@ -77,7 +77,10 @@ extension DerivableCoinTransactionManager {
     transactionsSubject.send(outgoingTransactions)
   }
   
-  func save(transactions: [DerivableCoinTransaction], replaceOnConflict: Bool) {
+  func save(
+    transactions: [DerivableCoinTransaction],
+    replaceOnConflict: Bool
+  ) {
     storage.save(transactions: transactions, replaceOnConflict: replaceOnConflict)
     transactionsSubject.send(transactions)
   }

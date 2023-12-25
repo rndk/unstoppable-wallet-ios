@@ -7,6 +7,7 @@ class DerivableBlockchainManager {
   
   private let blockchainTypes: [BlockchainType] = [
     .safeCoin,
+    .solana,
   ]
   
   private let marketKit: MarketKit.Kit
@@ -46,10 +47,6 @@ extension DerivableBlockchainManager {
       syncSourcesUpdatedRelay.asObservable()
   }
   
-//  func blockchain(token: Token) -> Blockchain? {
-//    allBlockchains.first(where: { token.blockchain == $0 })
-//  }
-  
   func defaultSyncSources(blockchainType: BlockchainType) -> [DerivableRpcSource] {
     //TODO сюда добавить стандартные блокчейн сорцы для остальных блокчейнов
     switch blockchainType {
@@ -70,6 +67,26 @@ extension DerivableBlockchainManager {
         blockchainUid: blockchainType.uid,
         name: "DevNet",
         link: "https://devnet.safely.org/",
+        createdAt: 0
+      )
+    ]
+    case .solana: return [
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "MainNet Beta",
+        link: "https://api.mainnet-beta.solana.com/",
+        createdAt: 0
+      ),
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "TestNet",
+        link: "https://api.testnet.solana.com/",
+        createdAt: 0
+      ),
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "DevNet",
+        link: "https://api.devnet.solana.com/",
         createdAt: 0
       )
     ]

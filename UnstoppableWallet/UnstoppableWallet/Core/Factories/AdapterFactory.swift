@@ -75,12 +75,23 @@ class AdapterFactory {
     }
   
     private func solanaAdapter(wallet: Wallet) -> IAdapter? {
-        //TODO
-        return nil
+      guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
+        account: wallet.account,
+        blockChainType: .solana,
+        derivableNetwork: SolanaNetwork(),
+        systemProframId: SolanaTokenProgram.systemProgramId,
+        tokenProgramId: SolanaTokenProgram.tokenProgramId,
+        associatedProgramId: SolanaTokenProgram.splAssociatedTokenAccountProgramId,
+        sysvarRent: SolanaTokenProgram.sysvarRent,
+        coinId: DerivableConstants.solanaCoinId
+      ) else {
+          return nil
+      }
+      
+      return DerivableCoinAdapter(coinKitWrapper: safeCoinKitWrapper)
     }
   
     private func safeCoinAdapter(wallet: Wallet) -> IAdapter? {
-        print(">>> ADAPTERFACTORY safeCoinAdapter()... \(wallet)") //TODO remove
         guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
           account: wallet.account,
           blockChainType: .safeCoin,
@@ -91,7 +102,6 @@ class AdapterFactory {
           sysvarRent: SafeCoinTokenProgram.sysvarRent,
           coinId: DerivableConstants.safeCoinId
         ) else {
-            print(">>> ADAPTERFACTORY safeCoinAdapter() error -> return nil...") //TODO remove
             return nil
         }
         
@@ -125,14 +135,18 @@ extension AdapterFactory {
     }
   
     func suiTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      // TODO
+      //
       return nil
     }
   
-    func safeCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      if let safeCoinKitWrapper = derivableCoinKitManager.coinKit(blockchainType: .safeCoin) {
-        print(">>> AdapterFactory return non nil SafeCoinTransactionsAdapter")
-        return DerivableCoinTransactionsAdapter(coinKitWrapper: safeCoinKitWrapper)
+    func derivableCoinTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
+      let query = TokenQuery(blockchainType: transactionSource.blockchainType, tokenType: .native)
+      if let coinKitWrapper = derivableCoinKitManager.coinKit(blockchainType: transactionSource.blockchainType), let baseToken = try? coinManager.token(query: query) {
+        return DerivableCoinTransactionsAdapter(
+          coinKitWrapper: coinKitWrapper,
+          transactionSource: transactionSource,
+          baseToken: baseToken
+        )
       }
       return nil
     }
@@ -185,12 +199,11 @@ extension AdapterFactory {
         case (.native, .sui):
             return suiAdapter(wallet: wallet)
           
-//        case (.native, .safeCoin):
-        case (_, .safeCoin):
+        case (.native, .safeCoin):
             return safeCoinAdapter(wallet: wallet)
           
-//        case (_, .solana):
-//            return solanaAdapter(wallet: wallet)
+        case (.native, .solana):
+            return solanaAdapter(wallet: wallet)
 
         default: ()
         }

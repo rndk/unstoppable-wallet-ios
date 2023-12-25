@@ -72,7 +72,7 @@ extension DerivableCoinSyncer {
   }
   
   func sync() {
-    print(">>> DerivableCoinSyncer sync() start...")
+    print(">>> DerivableCoinSyncer sync() \(self.blockchainUid) start...")
     Task { [weak self, networkInteractor, address, transactionManager, accountInfoManager, storage, blockchainUid] in
       do {
         guard let syncer = self, !syncer.syncing else {
@@ -82,12 +82,11 @@ extension DerivableCoinSyncer {
         
         let balance = try await networkInteractor.getBalance(address: address)
         accountInfoManager.handle(newBalance: balance)
-        print(">>> DerivableCoinSyncer saef coien blance: \(balance)")
+        print(">>> DerivableCoinSyncer \(self?.blockchainUid) coien blance: \(balance)")
         
         //todo blockHeight
         let newLastBlockHeight = try await networkInteractor.getLastBlockHeight()
         if self?.lastBlockHeight != Int(newLastBlockHeight) {
-//          storage.save(address: address, coinUid: "safe_coin_2", blockHeight: newLastBlockHeight)
           storage.save(address: address, coinUid: blockchainUid, blockHeight: newLastBlockHeight)
           self?.lastBlockHeight = Int(newLastBlockHeight)
           print(">>> DerivableCoinSyncer newLastBlockHeight: \(newLastBlockHeight)")
@@ -113,7 +112,7 @@ extension DerivableCoinSyncer {
         transactionManager.save(transactions: safeRpcExportedTxs, replaceOnConflict: true)
         
         self?.set(state: .synced)
-        print(">>> DerivableCoinSyncer sync() complete...")
+        print(">>> DerivableCoinSyncer sync() \(self?.blockchainUid) complete...")
       } catch {
         print(">>> DerivableCoinSyncer error while syncing \(error)")
         self?.set(state: .notSynced(error: error))

@@ -418,6 +418,31 @@ class TransactionInfoViewItemFactory {
             for event in record.incomingEvents {
                 sections.append(receiveSection(source: record.source, transactionValue: event.value, from: event.address, rates: item.rates, nftMetadata: item.nftMetadata))
             }
+          
+          
+        case let record as DerivableIncomingTransaction:
+            sections.append(
+              receiveSection(
+                source: record.source,
+                transactionValue: record.transactionValue,
+                from: record.from,
+                rates: item.rates
+              )
+            )
+
+        case let record as DerivableOutgoingTransaction:
+            sections.append(
+              sendSection(
+                source: record.source,
+                transactionValue: record.transactionValue,
+                to: record.to,
+                rates: item.rates,
+                nftMetadata: item.nftMetadata,
+                sentToSelf: false
+              )
+            )
+          
+          
 
         case let record as TronIncomingTransactionRecord:
             sections.append(receiveSection(source: record.source, transactionValue: record.value, from: record.from, rates: item.rates))

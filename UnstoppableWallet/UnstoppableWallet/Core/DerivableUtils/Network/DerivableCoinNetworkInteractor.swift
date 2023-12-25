@@ -103,7 +103,6 @@ extension DerivableCoinNetworkInteractor {
   }
   
   func safeTransfers(address: String) async throws -> [DerivableCoinTransaction] {
-    print(">>> SafeCoinGridProvider safeTransfers address: \(address)")
     let signaturesInfos = try await apiClient.getSignaturesForAddress(
       address: address, configs: RequestConfiguration(limit: pageLimit)
     )
@@ -111,7 +110,11 @@ extension DerivableCoinNetworkInteractor {
     for signatureInfo in signaturesInfos {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
       
-      let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
+//      let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
+      let transferInfo = transactionResponse.transaction.message.instructions.first { el in
+        el.parsed?.type == "transfer"
+      }?.parsed?.info
+      
       let amount = transferInfo?.lamports ?? UInt64(transferInfo?.amount ?? "0")
       
       let transaction = DerivableCoinTransaction(

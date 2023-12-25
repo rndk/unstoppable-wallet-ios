@@ -393,6 +393,50 @@ class TransactionsViewItemFactory {
             iconType = .localIcon(imageName: item.record.source.blockchainType.iconPlain32)
             title = record.transaction.contract?.label ?? "transactions.unknown_transaction.title".localized
             subTitle = "transactions.unknown_transaction.description".localized()
+          
+        case let record as DerivableIncomingTransaction:
+            iconType = singleValueIconType(source: record.source, value: record.transactionValue)
+            title = "transactions.receive".localized
+            subTitle = "transactions.from".localized(
+              mapped(
+                address: record.from,
+                blockchainType: item.record.source.blockchainType
+              )
+            )
+
+            primaryValue = TransactionsViewModel.Value(
+              text: coinString(from: record.transactionValue),
+              type: type(value: record.transactionValue, .incoming)
+            )
+
+            if let currencyValue = item.currencyValue {
+                secondaryValue = TransactionsViewModel.Value(
+                  text: currencyString(from: currencyValue),
+                  type: .secondary
+                )
+            }
+          
+        case let record as DerivableOutgoingTransaction:
+          iconType = singleValueIconType(source: record.source, value: record.transactionValue, nftMetadata: item.nftMetadata)
+          title = "transactions.send".localized
+          subTitle = "transactions.to".localized(
+            mapped(
+              address: record.to,
+              blockchainType: item.record.source.blockchainType
+            )
+          )
+
+          primaryValue = TransactionsViewModel.Value(
+            text: coinString(from: record.transactionValue, showSign: false),
+            type: type(value: record.transactionValue, condition: false, .neutral, .outgoing)
+          )
+          secondaryValue = singleValueSecondaryValue(
+            value: record.transactionValue,
+            currencyValue: item.currencyValue,
+            nftMetadata: item.nftMetadata
+          )
+
+          sentToSelf = false
 
         default:
             iconType = .localIcon(imageName: item.record.source.blockchainType.iconPlain32)

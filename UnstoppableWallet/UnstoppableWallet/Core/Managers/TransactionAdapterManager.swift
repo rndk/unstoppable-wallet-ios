@@ -15,49 +15,51 @@ class TransactionAdapterManager {
     private var _adapterMap = [TransactionSource: ITransactionsAdapter]()
 
     init(adapterManager: AdapterManager, evmBlockchainManager: EvmBlockchainManager, adapterFactory: AdapterFactory) {
-        self.adapterManager = adapterManager
-        self.evmBlockchainManager = evmBlockchainManager
-        self.adapterFactory = adapterFactory
-
-        adapterManager.adapterDataReadyObservable
-                .observeOn(SerialDispatchQueueScheduler(qos: .utility))
-                .subscribe(onNext: { [weak self] adapterData in
-                    self?.initAdapters(adapterMap: adapterData.adapterMap)
-                })
-                .disposed(by: disposeBag)
+      self.adapterManager = adapterManager
+      self.evmBlockchainManager = evmBlockchainManager
+      self.adapterFactory = adapterFactory
+      
+      adapterManager.adapterDataReadyObservable
+        .observeOn(SerialDispatchQueueScheduler(qos: .utility))
+        .subscribe(onNext: { [weak self] adapterData in
+          self?.initAdapters(adapterMap: adapterData.adapterMap)
+        })
+        .disposed(by: disposeBag)
     }
 
     private func initAdapters(adapterMap: [Wallet: IAdapter]) {
-        var newAdapterMap = [TransactionSource: ITransactionsAdapter]()
-
-        for (wallet, adapter) in adapterMap {
-            let source = wallet.transactionSource
-
-            guard newAdapterMap[source] == nil else {
-                continue
-            }
-
-            let transactionsAdapter: ITransactionsAdapter?
-
-            if evmBlockchainManager.allBlockchains.contains(where: { $0.type == source.blockchainType }) {
-                transactionsAdapter = adapterFactory.evmTransactionsAdapter(transactionSource: source)
-            } else if source.blockchainType == .tron {
-                transactionsAdapter = adapterFactory.tronTransactionsAdapter(transactionSource: source)
-            } else if source.blockchainType == .safeCoin {
-              transactionsAdapter = adapterFactory.safeCoinTransactionAdapter(transactionSource: source)
-          } else {
-                transactionsAdapter = adapter as? ITransactionsAdapter
-            }
-
-            if let transactionsAdapter = transactionsAdapter {
-                newAdapterMap[source] = transactionsAdapter
-            }
+      var newAdapterMap = [TransactionSource: ITransactionsAdapter]()
+      
+      for (wallet, adapter) in adapterMap {
+        let source = wallet.transactionSource
+        
+        guard newAdapterMap[source] == nil else {
+          continue
         }
-
-        queue.async {
-            self._adapterMap = newAdapterMap
-            self.adaptersReadyRelay.accept(())
+        
+        let transactionsAdapter: ITransactionsAdapter?
+        
+        if evmBlockchainManager.allBlockchains.contains(where: { $0.type == source.blockchainType }) {
+          transactionsAdapter = adapterFactory.evmTransactionsAdapter(transactionSource: source)
+        } else if source.blockchainType == .tron {
+          transactionsAdapter = adapterFactory.tronTransactionsAdapter(transactionSource: source)
+        } else if source.blockchainType == .safeCoin {
+          transactionsAdapter = adapterFactory.derivableCoinTransactionAdapter(transactionSource: source)
+        } else if source.blockchainType == .solana {
+          transactionsAdapter = adapterFactory.derivableCoinTransactionAdapter(transactionSource: source)
+        } else {
+          transactionsAdapter = adapter as? ITransactionsAdapter
         }
+        
+        if let transactionsAdapter = transactionsAdapter {
+          newAdapterMap[source] = transactionsAdapter
+        }
+      }
+      
+      queue.async {
+        self._adapterMap = newAdapterMap
+        self.adaptersReadyRelay.accept(())
+      }
     }
 
 }
@@ -65,15 +67,15 @@ class TransactionAdapterManager {
 extension TransactionAdapterManager {
 
     var adapterMap: [TransactionSource: ITransactionsAdapter] {
-        queue.sync { _adapterMap }
+      queue.sync { _adapterMap }
     }
-
+    
     var adaptersReadyObservable: Observable<Void> {
-        adaptersReadyRelay.asObservable()
+      adaptersReadyRelay.asObservable()
     }
-
+    
     func adapter(for source: TransactionSource) -> ITransactionsAdapter? {
-        queue.sync { _adapterMap[source] }
+      queue.sync { _adapterMap[source] }
     }
 
 }
