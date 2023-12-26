@@ -1656,6 +1656,7 @@
 "fee_settings.errors.nonce_already_in_block" = "Не удается заменить транзакцию.";
 "fee_settings.errors.replacement_transaction_underpriced" = "Низкая комиссия на замену транзакции";
 "fee_settings.errors.transaction_underpriced" = "Низкая комиссия за транзакцию";
+"fee_settings.errors.transaction_underpriced_rent" = "Невозможно выполнить транзакцию, т.к. на балансе должна быть сумма не меньше, чем стоимость аренды (%@) вашего аккаунта. Попробуйте уменьшить отправляемую сумму";
 "fee_settings.errors.tips_higher_than_max_fee" = "Слишком низкая макс. комиссия";
 "fee_settings.errors.zero_amount.info" = "Невозможно отправить 0 TRX";
 "fee_settings.warning.risk_of_getting_stuck" = "Риски";

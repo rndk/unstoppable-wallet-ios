@@ -3,7 +3,7 @@ import BigInt
 
 class BaseDerivableCoinAdapter {
   static let confirmationsThreshold = 18
-  let decimals: Int = 9
+  var decimals: Int = 9
   
   let wrapper: DerivableCoinKitWrapper
   

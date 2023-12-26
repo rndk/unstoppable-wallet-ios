@@ -43,8 +43,4 @@ extension DerivableCoinAccountInfoManager {
     balanceSubject.send(balance)
   }
   
-  func handleInactiveAccount() {
-      accountActive = false
-      balanceSubject.send(BigUInt.zero)
-  }
 }

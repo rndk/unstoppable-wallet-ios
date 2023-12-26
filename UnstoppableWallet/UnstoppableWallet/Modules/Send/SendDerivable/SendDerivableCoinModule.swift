@@ -10,15 +10,13 @@ class SendDerivableCoinModule {
     adapter: ISendDerivableCoinAdapter
   ) -> UIViewController? {
     
-    let safeCoinAddressParserItem = DerivableCoinAddressParser()
-    let addressParserChain = AddressParserChain().append(handler: safeCoinAddressParserItem)
+    let derivableAddressParserItem = DerivableCoinAddressParser()
+    let addressParserChain = AddressParserChain().append(handler: derivableAddressParserItem)
     
     let addressService = AddressService(
-//      mode: .parsers(AddressParserFactory.parser(blockchainType: .safeCoin), addressParserChain), //TODO TEST
       mode: .parsers(AddressParserFactory.parser(blockchainType: token.blockchainType), addressParserChain),
       marketKit: App.shared.marketKit,
       contactBookManager: App.shared.contactManager,
-//      blockchainType: .safeCoin //TODO TEST
       blockchainType: token.blockchainType
     )
     

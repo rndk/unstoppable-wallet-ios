@@ -1,7 +1,5 @@
 import Foundation
 import RxSwift
-import BigInt
-import HsToolKit
 import MarketKit
 
 class DerivableCoinTransactionsAdapter: BaseDerivableCoinAdapter {
@@ -12,7 +10,6 @@ class DerivableCoinTransactionsAdapter: BaseDerivableCoinAdapter {
   private let converter: DerivableTransactionConverter
   
   init(coinKitWrapper: DerivableCoinKitWrapper, transactionSource: TransactionSource, baseToken: Token) {
-//    super.init(coinKitWrapper: coinKitWrapper)
     self.blockchainType = coinKitWrapper.blockchainType
     self.transactionSource = transactionSource
     self.baseToken = baseToken

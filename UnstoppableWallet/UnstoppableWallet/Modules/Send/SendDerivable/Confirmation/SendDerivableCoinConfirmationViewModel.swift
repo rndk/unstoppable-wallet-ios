@@ -60,8 +60,8 @@ class SendDerivableCoinConfirmationViewModel {
       sendEnabledRelay.accept(false)
       
       let cautions = errors.map { error in
-        if let tronError = error as? SendTronConfirmationService.TransactionError {
-          switch tronError {
+        if let someError = error as? SendDerivableCoinConfirmationService.TransactionError {
+          switch someError {
           case .insufficientBalance(let balance):
             let coinValue = coinServiceFactory.baseCoinService.coinValue(value: balance)
             let balanceString = ValueFormatter.instance.formatShort(coinValue: coinValue)
@@ -76,6 +76,14 @@ class SendDerivableCoinConfirmationViewModel {
             return TitledCaution(
               title: "alert.error".localized,
               text: "fee_settings.errors.zero_amount.info".localized,
+              type: .error
+            )
+          case .rentError(let rent):
+            let coinValue = coinServiceFactory.baseCoinService.coinValue(value: rent)
+            let cost = ValueFormatter.instance.formatShort(coinValue: coinValue)
+            return TitledCaution(
+              title: "Error",
+              text: "fee_settings.errors.transaction_underpriced_rent".localized(cost!),
               type: .error
             )
           }
@@ -166,7 +174,8 @@ class SendDerivableCoinConfirmationViewModel {
 //      )
 //    }
     
-    return viewItems
+//    return viewItems
+    return []
   }
   
   private func items(

@@ -27,24 +27,27 @@ extension DerivableCoinTransactionManager {
   }
   
   func transactionsPublisher(
+    rpcSourceUrl: String,
     token: MarketKit.Token?,
     filter: TransactionTypeFilter
   ) -> AnyPublisher<[DerivableCoinTransaction], Never> {
     switch filter {
-    case .incoming: incomingTransactions()
-    case .outgoing: outgoingTransactions()
-    default: allTransactions()
+    case .incoming: incomingTransactions(rpcSourceUrl: rpcSourceUrl)
+    case .outgoing: outgoingTransactions(rpcSourceUrl: rpcSourceUrl)
+    default: allTransactions(rpcSourceUrl: rpcSourceUrl)
     }
     return transactionsPublisher
   }
   
   func transactions(
+    rpcSourceUrl: String,
     from: TransactionRecord?,
     token: MarketKit.Token?,
     filter: TransactionTypeFilter,
     limit: Int
   ) -> [DerivableCoinTransaction] {
     return storage.transactions(
+      rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: blockchainId,
       fromHash: from?.transactionHash,
@@ -53,24 +56,27 @@ extension DerivableCoinTransactionManager {
     )
   }
   
-  func allTransactions() {
+  func allTransactions(rpcSourceUrl: String) {
     let allTransactions = storage.allTransactions(
+      rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: self.blockchainId
     )
     transactionsSubject.send(allTransactions)
   }
   
-  func incomingTransactions() {
+  func incomingTransactions(rpcSourceUrl: String) {
     let incomingTransactions = storage.incomingTransactions(
+      rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: self.blockchainId
     )
     transactionsSubject.send(incomingTransactions)
   }
   
-  func outgoingTransactions() {
+  func outgoingTransactions(rpcSourceUrl: String) {
     let outgoingTransactions = storage.outgoingTransactions(
+      rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: self.blockchainId
     )
@@ -85,8 +91,9 @@ extension DerivableCoinTransactionManager {
     transactionsSubject.send(transactions)
   }
   
-  func getLastTransaction() -> DerivableCoinTransaction? {
+  func getLastTransaction(rpcSourceUrl: String) -> DerivableCoinTransaction? {
     storage.lastTransaction(
+      rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: self.blockchainId
     )

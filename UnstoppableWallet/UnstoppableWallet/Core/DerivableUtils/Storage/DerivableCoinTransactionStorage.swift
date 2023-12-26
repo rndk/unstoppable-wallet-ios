@@ -24,6 +24,7 @@ public class DerivableCoinTransactionStorage {
     migrator.registerMigration("Derivable Coin Transactioins") { db in
       print(">>> DerivableCoinTransactionStorage in migrator, register migrator -> Create Derivable Transactions")
       try db.create(table: DerivableCoinTransaction.databaseTableName) { t in
+        t.column(DerivableCoinTransaction.Columns.rpcSourceUrl.name, .text).notNull()
         t.column(DerivableCoinTransaction.Columns.blockchainUid.name, .text).notNull()
         t.column(DerivableCoinTransaction.Columns.hash.name, .text).notNull()
         t.column(DerivableCoinTransaction.Columns.currentAddress.name, .text).notNull()
@@ -35,6 +36,7 @@ public class DerivableCoinTransactionStorage {
         t.column(DerivableCoinTransaction.Columns.isFailed.name, .boolean).notNull()
         t.primaryKey(
           [
+            DerivableCoinTransaction.Columns.rpcSourceUrl.name,
             DerivableCoinTransaction.Columns.blockchainUid.name,
             DerivableCoinTransaction.Columns.currentAddress.name,
             DerivableCoinTransaction.Columns.hash.name
@@ -50,54 +52,77 @@ public class DerivableCoinTransactionStorage {
 
 extension DerivableCoinTransactionStorage {
   
-  func lastTransaction(address: String, blockchainUid: String) -> DerivableCoinTransaction? {
+  func lastTransaction(
+    rpcSourceUrl: String,
+    address: String,
+    blockchainUid: String
+  ) -> DerivableCoinTransaction? {
     try! dbPool.read { db in
       try DerivableCoinTransaction
         .filter(
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .order(DerivableCoinTransaction.Columns.blockTime.desc)
         .fetchOne(db)
     }
   }
   
-  func allTransactions(address: String, blockchainUid: String) -> [DerivableCoinTransaction] {
+  func allTransactions(
+    rpcSourceUrl: String,
+    address: String,
+    blockchainUid: String
+  ) -> [DerivableCoinTransaction] {
     try! dbPool.read { db in
       try DerivableCoinTransaction
         .filter(
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchAll(db)
     }
   }
   
-  func incomingTransactions(address: String, blockchainUid: String) -> [DerivableCoinTransaction] {
+  func incomingTransactions(
+    rpcSourceUrl: String,
+    address: String,
+    blockchainUid: String
+  ) -> [DerivableCoinTransaction] {
     try! dbPool.read { db in
       try DerivableCoinTransaction
         .filter(
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.to == address
-        ) //TODO test
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
+        )
         .fetchAll(db)
     }
   }
   
-  func outgoingTransactions(address: String, blockchainUid: String) -> [DerivableCoinTransaction] {
+  func outgoingTransactions(
+    rpcSourceUrl: String,
+    address: String,
+    blockchainUid: String
+  ) -> [DerivableCoinTransaction] {
     try! dbPool.read { db in
       try DerivableCoinTransaction
         .filter(
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.from == address
-        ) //TODO test
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
+        )
         .fetchAll(db)
     }
   }
   
-  func save(transactions: [DerivableCoinTransaction], replaceOnConflict: Bool) {
+  func save(
+    transactions: [DerivableCoinTransaction],
+    replaceOnConflict: Bool
+  ) {
     try! dbPool.write { db in
       for transaction in transactions {
         if !replaceOnConflict, try transaction.exists(db) {
@@ -110,6 +135,7 @@ extension DerivableCoinTransactionStorage {
   }
   
   func transactions(
+    rpcSourceUrl: String,
     address: String,
     blockchainUid: String,
     fromHash: String?,
@@ -117,30 +143,73 @@ extension DerivableCoinTransactionStorage {
     limit: Int?
   ) -> [DerivableCoinTransaction] {
     switch filter {
-    case .all: return allTransactions(address: address, blockchainUid: blockchainUid)
+    case .all: return allTransactions(
+      rpcSourceUrl: rpcSourceUrl,
+      address: address,
+      blockchainUid: blockchainUid
+    )
     case .incoming: do {
       if fromHash != nil, limit != nil {
-        return incomingTransactions(address: address, blockchainUid: blockchainUid, fromHash: fromHash!, limit: limit!)
+        return incomingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid,
+          fromHash: fromHash!,
+          limit: limit!
+        )
       } else if fromHash != nil {
-        return incomingTransactions(address: address, blockchainUid: blockchainUid, fromHash: fromHash!)
+        return incomingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid,
+          fromHash: fromHash!
+        )
       } else {
-        return incomingTransactions(address: address, blockchainUid: blockchainUid)
+        return incomingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid
+        )
       }
     }
     case .outgoing: do {
       if fromHash != nil, limit != nil {
-        return outgoingTransactions(address: address, blockchainUid: blockchainUid, fromHash: fromHash!, limit: limit!)
+        return outgoingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid,
+          fromHash: fromHash!,
+          limit: limit!
+        )
       } else if fromHash != nil {
-        return outgoingTransactions(address: address, blockchainUid: blockchainUid, fromHash: fromHash!)
+        return outgoingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid,
+          fromHash: fromHash!
+        )
       } else {
-        return outgoingTransactions(address: address, blockchainUid: blockchainUid)
+        return outgoingTransactions(
+          rpcSourceUrl: rpcSourceUrl,
+          address: address,
+          blockchainUid: blockchainUid
+        )
       }
     }
-    default: return allTransactions(address: address, blockchainUid: blockchainUid)
+    default: return allTransactions(
+      rpcSourceUrl: rpcSourceUrl,
+      address: address,
+      blockchainUid: blockchainUid
+    )
     }
   }
   
-  private func incomingTransactions(address: String, blockchainUid: String, fromHash: String) -> [DerivableCoinTransaction] {
+  private func incomingTransactions(
+    rpcSourceUrl: String,
+    address: String,
+    blockchainUid: String,
+    fromHash: String
+  ) -> [DerivableCoinTransaction] {
     try! dbPool.read { db in
       
       let transaction = try DerivableCoinTransaction
@@ -149,6 +218,7 @@ extension DerivableCoinTransactionStorage {
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.to == address
           && DerivableCoinTransaction.Columns.hash == fromHash
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchOne(db)
       
@@ -162,12 +232,14 @@ extension DerivableCoinTransactionStorage {
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.to == address
           && DerivableCoinTransaction.Columns.blockTime > trans.blockTime
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchAll(db)
     }
   }
   
   private func incomingTransactions(
+    rpcSourceUrl: String,
     address: String,
     blockchainUid: String,
     fromHash: String,
@@ -181,6 +253,7 @@ extension DerivableCoinTransactionStorage {
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.to == address
           && DerivableCoinTransaction.Columns.hash == fromHash
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchOne(db)
       
@@ -193,6 +266,7 @@ extension DerivableCoinTransactionStorage {
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.to == address
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
           && DerivableCoinTransaction.Columns.blockTime > trans.blockTime
         )
         .limit(limit)
@@ -201,6 +275,7 @@ extension DerivableCoinTransactionStorage {
   }
   
   private func outgoingTransactions(
+    rpcSourceUrl: String,
     address: String,
     blockchainUid: String,
     fromHash: String
@@ -212,6 +287,7 @@ extension DerivableCoinTransactionStorage {
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.from == address
           && DerivableCoinTransaction.Columns.hash == fromHash
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchOne(db)
       
@@ -224,6 +300,7 @@ extension DerivableCoinTransactionStorage {
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.from == address
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
           && DerivableCoinTransaction.Columns.blockTime > trans.blockTime
         )
         .fetchAll(db)
@@ -231,6 +308,7 @@ extension DerivableCoinTransactionStorage {
   }
   
   private func outgoingTransactions(
+    rpcSourceUrl: String,
     address: String,
     blockchainUid: String,
     fromHash: String,
@@ -243,6 +321,7 @@ extension DerivableCoinTransactionStorage {
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.from == address
           && DerivableCoinTransaction.Columns.hash == fromHash
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
         )
         .fetchOne(db)
       
@@ -255,6 +334,7 @@ extension DerivableCoinTransactionStorage {
           DerivableCoinTransaction.Columns.currentAddress == address
           && DerivableCoinTransaction.Columns.blockchainUid == blockchainUid
           && DerivableCoinTransaction.Columns.from == address
+          && DerivableCoinTransaction.Columns.rpcSourceUrl == rpcSourceUrl
           && DerivableCoinTransaction.Columns.blockTime > trans.blockTime
         )
         .limit(limit)

@@ -7,7 +7,6 @@ class DerivableCoinKitManager {
   
   private let syncSourceManager: DerivableBlockchainManager
   private var currentAccount: Account?
-//  private weak var _safeCoinKitWrapper: DerivableCoinKitWrapper?
   
   private let disposeBag = DisposeBag()
   private let queue = DispatchQueue(label: "\(AppConfig.label).derivable-coin-kit-manager", qos: .userInitiated)
@@ -24,10 +23,6 @@ class DerivableCoinKitManager {
   
   private func handleUpdatedSyncSource(blockchainType: BlockchainType) {
     queue.sync {
-//      guard let _safeCoinKitWrapper = _safeCoinKitWrapper else {
-//        return
-//      }
-      
       guard let kitWrapper = kitMap[blockchainType] else {
         return
       }
@@ -35,11 +30,6 @@ class DerivableCoinKitManager {
       guard kitWrapper.blockchainType == blockchainType else {
         return
       }
-      
-//      self._safeCoinKitWrapper?.safeCoinKit.updateNetwork(
-//        source: syncSourceManager.syncSource(blockchainType: blockchainType).link
-//      )
-//      self._safeCoinKitWrapper?.safeCoinKit.refresh()
       
       kitWrapper.coinKit.updateNetwork(
         source: syncSourceManager.syncSource(blockchainType: blockchainType).link
@@ -49,6 +39,7 @@ class DerivableCoinKitManager {
   }
   
   private func _coinKitWrapper(
+    token: MarketKit.Token,
     account: Account,
     blockchainType: BlockchainType,
     derivableNetwork: DerivableCoinNetwork,
@@ -58,10 +49,6 @@ class DerivableCoinKitManager {
     sysvarRent: PublicKey,
     coinId: Int
   ) throws -> DerivableCoinKitWrapper {
-    //    if let _safeCoinKitWrapper = _safeCoinKitWrapper, let currentAccount = currentAccount, currentAccount == account {
-    //      return _safeCoinKitWrapper
-    //    }
-    
     if let wrp = kitMap[blockchainType], let currentAccount = currentAccount, currentAccount == account {
       return wrp
     }
@@ -90,10 +77,10 @@ class DerivableCoinKitManager {
     let signer = DerivableCoinSigner(pair: keyPair)
     let address: String = signer.address()
     
-    //    let networkUrl = self.syncSourceManager.syncSource(blockchainType: .safeCoin).link
     let networkUrl = self.syncSourceManager.syncSource(blockchainType: blockchainType).link
     
     let coinKit = try DerivableCoinKit.instance(
+      token: token,
       signer: signer,
       blockchainUid: blockchainType.uid,
       address: address,
@@ -113,9 +100,7 @@ class DerivableCoinKitManager {
     
     let wrapper = DerivableCoinKitWrapper(blockchainType: blockchainType, coinKit: coinKit)
     
-    //    _safeCoinKitWrapper = wrapper
     currentAccount = account
-    
     kitMap[blockchainType] = wrapper
     
     return wrapper
@@ -144,12 +129,6 @@ class DerivableCoinKitWrapper {
 
 extension DerivableCoinKitManager {
   
-//  var coinKit: DerivableCoinKitWrapper? {
-//    queue.sync {
-//      _safeCoinKitWrapper
-//    }
-//  }
-  
   func coinKit(blockchainType: BlockchainType) -> DerivableCoinKitWrapper? {
     queue.sync {
       kitMap[blockchainType]
@@ -157,6 +136,7 @@ extension DerivableCoinKitManager {
   }
   
   func coinKit(
+    token: MarketKit.Token,
     account: Account,
     blockChainType: BlockchainType,
     derivableNetwork: DerivableCoinNetwork,
@@ -168,6 +148,7 @@ extension DerivableCoinKitManager {
   ) throws -> DerivableCoinKitWrapper {
     try queue.sync {
       try _coinKitWrapper(
+        token: token,
         account: account,
         blockchainType: blockChainType,
         derivableNetwork: derivableNetwork,

@@ -2,6 +2,7 @@ import Foundation
 import GRDB
 
 public class DerivableCoinTransaction: Record {
+  public let rpcSourceUrl: String
   public let blockchainUid: String
   public let hash: String
   public let currentAddress: String
@@ -13,6 +14,7 @@ public class DerivableCoinTransaction: Record {
   public let isFailed: Bool
   
   init(
+    rpcSourceUrl: String,
     blockchainUid: String,
     hash: String,
     currentAddress: String,
@@ -23,6 +25,7 @@ public class DerivableCoinTransaction: Record {
     fee: UInt64,
     isFailed: Bool
   ) {
+    self.rpcSourceUrl = rpcSourceUrl
     self.blockchainUid = blockchainUid
     self.hash = hash
     self.currentAddress = currentAddress
@@ -41,6 +44,7 @@ public class DerivableCoinTransaction: Record {
   }
   
   enum Columns: String, ColumnExpression, CaseIterable {
+    case rpcSourceUrl
     case blockchainUid
     case hash
     case currentAddress
@@ -53,6 +57,7 @@ public class DerivableCoinTransaction: Record {
   }
   
   required init(row: Row) {
+    rpcSourceUrl = row[Columns.rpcSourceUrl]
     blockchainUid = row[Columns.blockchainUid]
     hash = row[Columns.hash]
     currentAddress = row[Columns.currentAddress]
@@ -67,6 +72,7 @@ public class DerivableCoinTransaction: Record {
   }
   
   override public func encode(to container: inout PersistenceContainer) {
+    container[Columns.rpcSourceUrl] = rpcSourceUrl
     container[Columns.blockchainUid] = blockchainUid
     container[Columns.hash] = hash
     container[Columns.currentAddress] = currentAddress

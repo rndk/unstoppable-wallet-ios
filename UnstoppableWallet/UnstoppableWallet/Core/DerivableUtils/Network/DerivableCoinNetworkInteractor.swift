@@ -41,16 +41,6 @@ class DerivableCoinNetworkInteractor {
     self.associatedProgramId = associatedProgramId
     self.sysvarRent = sysvarRent
     
-//    self.headers = HTTPHeaders()
-    
-//    self.blockchainClient = BlockchainClient(
-//      apiClient: self.apiClient,
-//      systemProgrammId: SafeCoinTokenProgram.systemProgramId,
-//      tokenProgramId: SafeCoinTokenProgram.tokenProgramId,
-//      associatedProgramId: SafeCoinTokenProgram.splAssociatedTokenAccountProgramId,
-//      sysvarRent: SafeCoinTokenProgram.sysvarRent
-//    )
-    
     self.blockchainClient = BlockchainClient(
       apiClient: self.apiClient,
       systemProgrammId: self.systemProgramId,
@@ -110,7 +100,6 @@ extension DerivableCoinNetworkInteractor {
     for signatureInfo in signaturesInfos {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
       
-//      let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
       let transferInfo = transactionResponse.transaction.message.instructions.first { el in
         el.parsed?.type == "transfer"
       }?.parsed?.info
@@ -118,6 +107,7 @@ extension DerivableCoinNetworkInteractor {
       let amount = transferInfo?.lamports ?? UInt64(transferInfo?.amount ?? "0")
       
       let transaction = DerivableCoinTransaction(
+        rpcSourceUrl: self.baseUrl,
         blockchainUid: self.blockchainUid,
         hash: signatureInfo.signature,
         currentAddress: address,
@@ -143,10 +133,8 @@ extension DerivableCoinNetworkInteractor {
     for signatureInfo in signaturesInfo {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
       
-//      let transferInfo = transactionResponse.transaction.message.instructions.first?.parsed?.info
-//      let amount = transferInfo?.lamports ?? (UInt64(transferInfo?.amount ?? "0"))
-      
       let transaction = DerivableCoinTransaction(
+        rpcSourceUrl: self.baseUrl,
         blockchainUid: self.blockchainUid,
         hash: signatureInfo.signature,
         currentAddress: address,
@@ -165,7 +153,6 @@ extension DerivableCoinNetworkInteractor {
   func getTokenAccountsByOwner(address: String) async throws -> [String] {
     let infoParams = OwnerInfoParams(
       mint: nil,
-//      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
       programId: tokenProgramId.base58EncodedString
     )
     let accounts = try await apiClient.getTokenAccountsByOwner(
@@ -174,7 +161,7 @@ extension DerivableCoinNetworkInteractor {
     )
     var result: [String] = []
     for acc in accounts {
-      result.append(acc.account.data.mint.base58EncodedString) //TODO to base58?
+      result.append(acc.account.data.mint.base58EncodedString)
     }
     return result
   }
@@ -182,7 +169,6 @@ extension DerivableCoinNetworkInteractor {
   func getTokenAccountsByOwnerStrings(address: String) async throws -> [String] {
     let infoParams = OwnerInfoParams(
       mint: nil,
-//      programId: SafeCoinTokenProgram.tokenProgramId.base58EncodedString
       programId: tokenProgramId.base58EncodedString
     )
     let accounts = try await apiClient.getTokenAccountsByOwner(
@@ -202,7 +188,6 @@ extension DerivableCoinNetworkInteractor {
       to: to,
       amount: amount
     )
-    print(">>> SafeCoinGripProvider estimeteFee: \(preparedTransaction)")
     return preparedTransaction
   }
   

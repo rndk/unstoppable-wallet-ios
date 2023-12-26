@@ -12,7 +12,7 @@ struct SendDerivableCoinConfirmationModule {
     sendData: SendDerivableCoinService.SendData
   ) -> UIViewController? {
     guard let coinServiceFactory = EvmCoinServiceFactory(
-      blockchainType: .safeCoin,
+      blockchainType: coinKitWrapper.blockchainType,
       marketKit: App.shared.marketKit,
       currencyKit: App.shared.currencyKit,
       coinManager: App.shared.coinManager
@@ -40,7 +40,7 @@ struct SendDerivableCoinConfirmationModule {
     )
     let contactLabelService = ContactLabelService(
       contactManager: App.shared.contactManager,
-      blockchainType: .safeCoin
+      blockchainType: coinKitWrapper.blockchainType
     )
     let viewModel = SendDerivableCoinConfirmationViewModel(
       service: service,

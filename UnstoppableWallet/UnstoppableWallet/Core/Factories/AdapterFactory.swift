@@ -75,7 +75,8 @@ class AdapterFactory {
     }
   
     private func solanaAdapter(wallet: Wallet) -> IAdapter? {
-      guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
+      guard let solanaKitWrapper = try? derivableCoinKitManager.coinKit(
+        token: wallet.token,
         account: wallet.account,
         blockChainType: .solana,
         derivableNetwork: SolanaNetwork(),
@@ -88,11 +89,12 @@ class AdapterFactory {
           return nil
       }
       
-      return DerivableCoinAdapter(coinKitWrapper: safeCoinKitWrapper)
+      return DerivableCoinAdapter(coinKitWrapper: solanaKitWrapper)
     }
   
     private func safeCoinAdapter(wallet: Wallet) -> IAdapter? {
         guard let safeCoinKitWrapper = try? derivableCoinKitManager.coinKit(
+          token: wallet.token,
           account: wallet.account,
           blockChainType: .safeCoin,
           derivableNetwork: SafeCoinNetwork(),

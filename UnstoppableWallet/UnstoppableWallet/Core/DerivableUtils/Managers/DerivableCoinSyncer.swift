@@ -79,6 +79,7 @@ extension DerivableCoinSyncer {
           return
         }
         syncer.syncing = true
+        self?.set(state: .syncing(progress: nil))
         
         let balance = try await networkInteractor.getBalance(address: address)
         accountInfoManager.handle(newBalance: balance)
@@ -92,8 +93,8 @@ extension DerivableCoinSyncer {
           print(">>> DerivableCoinSyncer newLastBlockHeight: \(newLastBlockHeight)")
         }
         
-        let lastTransactionHash = transactionManager.getLastTransaction()?.hash
-        print(">>> DerivableCoinSyncer last transaction hash: \(lastTransactionHash)")
+//        let lastTransactionHash = transactionManager.getLastTransaction(rpcSourceUrl: networkInteractor.source)?.hash
+//        print(">>> DerivableCoinSyncer last transaction hash: \(lastTransactionHash)")
         
         //let rpcSignatureInfos = try await self?.getSignaturesFromRpcNode(
         //  lastTransactionHash: lastTransactionHash

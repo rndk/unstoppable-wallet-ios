@@ -5,6 +5,7 @@ import Combine
 import MarketKit
 
 public class DerivableCoinKit {
+  private let token: Token
   private let signer: DerivableCoinSigner
   private let syncer: DerivableCoinSyncer
   private let accountInfoManager: DerivableCoinAccountInfoManager
@@ -24,6 +25,7 @@ public class DerivableCoinKit {
   
   
   init(
+    token: Token,
     blockchainUid: String,
     address: String,
     networkUrl: String,
@@ -40,6 +42,7 @@ public class DerivableCoinKit {
     sysvarRent: PublicKey
     
   ) {
+    self.token = token
     self.address = address
     self.blockchainUid = blockchainUid
     self.networkUrl = networkUrl
@@ -85,6 +88,10 @@ extension DerivableCoinKit {
     self.address
   }
   
+  public var coinToken: Token {
+    self.token
+  }
+  
   public var lastBlockHeightPublisher: AnyPublisher<Int, Never> {
     syncer.$lastBlockHeight.eraseToAnyPublisher()
   }
@@ -113,7 +120,11 @@ extension DerivableCoinKit {
     token: MarketKit.Token?,
     filter: TransactionTypeFilter
   ) -> AnyPublisher<[DerivableCoinTransaction], Never> {
-      return transactionManager.transactionsPublisher(token: token, filter: filter)
+      return transactionManager.transactionsPublisher(
+        rpcSourceUrl: self.networkUrl,
+        token: token,
+        filter: filter
+      )
   }
   
   func transactions(
@@ -122,7 +133,13 @@ extension DerivableCoinKit {
     filter: TransactionTypeFilter,
     limit: Int
   ) -> [DerivableCoinTransaction] {
-    transactionManager.transactions(from: from, token: token, filter: filter, limit: limit)
+    transactionManager.transactions(
+      rpcSourceUrl: self.networkUrl,
+      from: from,
+      token: token,
+      filter: filter,
+      limit: limit
+    )
   }
   
   public func prepareTransaction(
@@ -160,6 +177,7 @@ extension DerivableCoinKit {
 extension DerivableCoinKit {
   
   public static func instance(
+    token: MarketKit.Token,
     signer: DerivableCoinSigner,
     blockchainUid: String,
     address: String,
@@ -179,12 +197,10 @@ extension DerivableCoinKit {
     let accountInfoManager = DerivableCoinAccountInfoManager(
       storage: accountInfoStorage,
       address: address,
-//      blockchainUid: BlockchainType.safeCoin.uid
       blockchainUid: blockchainUid
     )
     let transactionManager = DerivableCoinTransactionManager(
       userAddress: address,
-//      blockchainId: BlockchainType.safeCoin.uid,
       blockchainId: blockchainUid,
       storage: transactionStorage
     )
@@ -193,7 +209,6 @@ extension DerivableCoinKit {
     
     let networkInteractor = DerivableCoinNetworkInteractor(
       baseUrl: networkUrl,
-//      blockchainUid: BlockchainType.safeCoin.uid,
       blockchainUid: blockchainUid,
       networkManager: networkManager,
       signer: signer,
@@ -210,12 +225,12 @@ extension DerivableCoinKit {
       networkInteractor: networkInteractor,
       syncerStorage: syncerStorage,
       address: address,
-//      blockchainUid: BlockchainType.safeCoin.uid
       blockchainUid: blockchainUid
     )
     let transactionSender = DerivableCoinTransactionSender(networkInteractor: networkInteractor)
     
     let kit = DerivableCoinKit(
+      token: token,
       blockchainUid: blockchainUid,
       address: address,
       networkUrl: networkUrl,
@@ -234,18 +249,6 @@ extension DerivableCoinKit {
     
     return kit
   }
-  
-//  private static func dataDirectoryUrl() throws -> URL {
-//    let fileManager = FileManager.default
-//    
-//    let url = try fileManager
-//      .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-//      .appendingPathComponent("safe-coin-kit", isDirectory: true)
-//    
-//    try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
-//    
-//    return url
-//  }
   
 }
 

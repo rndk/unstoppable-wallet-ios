@@ -1653,6 +1653,7 @@ Go to Settings - > %@ and allow access to the camera.";
 "fee_settings.errors.nonce_already_in_block" = "Can't replace transaction.";
 "fee_settings.errors.replacement_transaction_underpriced" = "Low Fee for replacement transaction";
 "fee_settings.errors.transaction_underpriced" = "Low Fee for transaction";
+"fee_settings.errors.transaction_underpriced_rent" = "The transaction cannot be executed - the balance must have an amount not less than the cost (%@) of renting your account. Please try to reduce the amount being sent.";
 "fee_settings.errors.tips_higher_than_max_fee" = "Max Fee is too low";
 "fee_settings.errors.zero_amount.info" = "Cannot transfer 0 TRX";
 "fee_settings.warning.risk_of_getting_stuck" = "Risky";

@@ -1,5 +1,4 @@
 import Foundation
-import BigInt
 
 class DerivableCoinTransactionSender {
   private let networkInteractor: DerivableCoinNetworkInteractor

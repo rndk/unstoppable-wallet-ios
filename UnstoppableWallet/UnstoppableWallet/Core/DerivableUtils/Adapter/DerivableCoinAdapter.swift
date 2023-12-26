@@ -2,18 +2,12 @@ import Foundation
 import RxSwift
 
 class DerivableCoinAdapter: BaseDerivableCoinAdapter {
-  static let decimals = 9
   
   override init(coinKitWrapper: DerivableCoinKitWrapper) {
     super.init(coinKitWrapper: coinKitWrapper)
+    self.decimals = coinKitWrapper.coinKit.coinToken.decimals
   }
 }
-
-//extension SafeCoinAdapter {
-//  static func clear(except excludedWalletIds: [String]) throws {
-//    //try TronKit.Kit.clear(exceptFor: excludedWalletIds)
-//  }
-//}
 
 // IAdapter
 extension DerivableCoinAdapter: IAdapter {
@@ -61,15 +55,4 @@ extension DerivableCoinAdapter: IBalanceAdapter {
   
 }
 
-extension DerivableCoinAdapter: ISendDerivableCoinAdapter {
-  func validate(address: String) throws {
-    //TODO validate address
-  }
-  func sendTransaction(trx: String) {
-    //TODO send transaction
-  }
-  var availableBalance: Decimal {
-    //TODO balance to Decimals
-    0
-  }
-}
+extension DerivableCoinAdapter: ISendDerivableCoinAdapter { }
