@@ -92,9 +92,12 @@ extension DerivableCoinNetworkInteractor {
     return try await apiClient.getSignaturesForAddress(address: address, configs: requestConfiguration)
   }
   
-  func safeTransfers(address: String) async throws -> [DerivableCoinTransaction] {
+  func safeTransfers(
+    address: String,
+    lastTransaction: String? = nil
+  ) async throws -> [DerivableCoinTransaction] {
     let signaturesInfos = try await apiClient.getSignaturesForAddress(
-      address: address, configs: RequestConfiguration(limit: pageLimit)
+      address: address, configs: RequestConfiguration(limit: pageLimit, until: lastTransaction)
     )
     var result: [DerivableCoinTransaction] = []
     for signatureInfo in signaturesInfos {
@@ -123,13 +126,18 @@ extension DerivableCoinNetworkInteractor {
     return result
   }
   
-  func splTransfers(address: String) async throws -> [DerivableCoinTransaction] {
+  func splTransfers(
+    address: String,
+    lastTransaction: String? = nil
+  ) async throws -> [DerivableCoinTransaction] {
     var result: [DerivableCoinTransaction] = []
     let tokenAccounts = try await getTokenAccountsByOwnerStrings(address: address)
     if tokenAccounts.isEmpty {
       return result
     }
-    let signaturesInfo = try await apiClient.getSignaturesForAddress(address: address)
+    let signaturesInfo = try await apiClient.getSignaturesForAddress(
+      address: address, configs: RequestConfiguration(limit: pageLimit, until: lastTransaction)
+    )
     for signatureInfo in signaturesInfo {
       let transactionResponse = try await apiClient.getTransaction(transactionSignature: signatureInfo.signature)
       

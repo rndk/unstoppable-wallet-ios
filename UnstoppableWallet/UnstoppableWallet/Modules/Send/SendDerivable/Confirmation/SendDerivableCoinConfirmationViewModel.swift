@@ -119,36 +119,9 @@ class SendDerivableCoinConfirmationViewModel {
     }
   }
   
-  //    private func feeItems(fees: [Fee]) -> [SafeCoinFeeViewItem] {
-  //    private func feeItems(fees: [BigUInt]) -> [SafeCoinFeeViewItem] {
   private func feeItems(fee: BigUInt) -> [DerivableCoinFeeViewItem] {
     var viewItems = [DerivableCoinFeeViewItem]()
     let coinService = coinServiceFactory.baseCoinService
-//    var bandwidth: String?
-//    var energy: String?
-    
-//    for fee in fees {
-//      switch fee {
-//      case .accountActivation(let amount):
-//        let amountData = coinService.amountData(value: BigUInt(amount))
-//        
-//        viewItems.append(
-//          SafeCoinFeeViewItem(
-//            title: "tron.send.activation_fee".localized,
-//            info: "tron.send.activation_fee.info".localized,
-//            value1: ValueFormatter.instance.formatShort(coinValue: amountData.coinValue) ?? "n/a".localized,
-//            value2: amountData.currencyValue.flatMap { ValueFormatter.instance.formatShort(currencyValue: $0) },
-//            value2IsSecondary: true
-//          )
-//        )
-//        
-//      case .bandwidth(let points, _):
-//        bandwidth = ValueFormatter.instance.formatShort(value: Decimal(points), decimalCount: 0)
-//        
-//      case .energy(let required, _):
-//        energy = ValueFormatter.instance.formatShort(value: Decimal(required), decimalCount: 0)
-//      }
-//    }
     
     let amountData = coinService.amountData(value: BigUInt(service.getSendData().sendAmount))
     
@@ -162,63 +135,18 @@ class SendDerivableCoinConfirmationViewModel {
       )
     )
     
-//    if bandwidth != nil || energy != nil {
-//      viewItems.append(
-//        TronFeeViewItem(
-//          title: "tron.send.resources_consumed".localized,
-//          info: "tron.send.resources_consumed.info".localized,
-//          value1: bandwidth.flatMap { "\($0) \("tron.send.bandwidth".localized)" } ?? "",
-//          value2: energy.flatMap { "\($0) \("tron.send.energy".localized)" },
-//          value2IsSecondary: false
-//        )
-//      )
-//    }
-    
-//    return viewItems
     return []
   }
   
   private func items(
     dataState: SendDerivableCoinConfirmationService.DataState
   ) -> [SectionViewItem] {
-    //if let decoration = dataState.decoration, let items = self.items(decoration: decoration, contract: dataState.contract) {
-    //   return items
-    //}
-    
     return sendBaseCoinItems(
       to: dataState.sendData!.addressData.coinAddress,
       value: dataState.sendData!.sendAmount
     )
     
-//    return []
   }
-  
-//  private func items(
-//    decoration: TransactionDecoration,
-//    contract: Contract?
-//  ) -> [SectionViewItem]? {
-//    switch decoration {
-//    case let decoration as NativeTransactionDecoration:
-//      guard let transfer = decoration.contract as? TransferContract else {
-//        return nil
-//      }
-//      
-//      return sendBaseCoinItems(
-//        to: transfer.toAddress,
-//        value: BigUInt(transfer.amount)
-//      )
-//      
-//    case let decoration as OutgoingEip20Decoration:
-//      return eip20TransferItems(
-//        to: decoration.to,
-//        value: decoration.value,
-//        contractAddress: decoration.contractAddress
-//      )
-//      
-//    default:
-//      return nil
-//    }
-//  }
   
   private func addressActiveViewItems() -> [ViewItem] {
     guard !service.sendAdressActive else {

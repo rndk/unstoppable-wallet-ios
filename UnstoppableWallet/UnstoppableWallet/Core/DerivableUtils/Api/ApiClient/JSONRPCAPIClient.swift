@@ -342,9 +342,9 @@ public class JSONRPCAPIClient: DerivationApiClient {
     configs: RequestConfiguration? = nil
   ) async throws -> [DerivableSignatureInfo] {
     //TODO method: "getSignaturesForAddress" - официальное название
-    //TODO method: "getConfirmedSignaturesForAddress2" - это что дергает наш эксплорер
+    //TODO method: "getConfirmedSignaturesForAddress2" - это что дергает наш эксплорер, и солановский тоже...
     try await get(
-      method: "getSignaturesForAddress",
+      method: "getConfirmedSignaturesForAddress2",
       params: [address, configs]
     )
   }
