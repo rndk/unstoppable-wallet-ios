@@ -7,6 +7,9 @@ class DerivableCoinTransactionManager {
   private let blockchainId: String
   private let storage: DerivableCoinTransactionStorage
   
+  private var lastUsedRpc: String? = nil
+  private var lastUsedFilter: TransactionTypeFilter? = nil
+  
   init(
     userAddress: String,
     blockchainId: String,
@@ -31,6 +34,9 @@ extension DerivableCoinTransactionManager {
     token: MarketKit.Token?,
     filter: TransactionTypeFilter
   ) -> AnyPublisher<[DerivableCoinTransaction], Never> {
+    self.lastUsedRpc = rpcSourceUrl
+    self.lastUsedFilter = filter
+    
     switch filter {
     case .incoming: incomingTransactions(rpcSourceUrl: rpcSourceUrl)
     case .outgoing: outgoingTransactions(rpcSourceUrl: rpcSourceUrl)
@@ -88,11 +94,44 @@ extension DerivableCoinTransactionManager {
     replaceOnConflict: Bool
   ) {
     storage.save(transactions: transactions, replaceOnConflict: replaceOnConflict)
-    transactionsSubject.send(transactions)
+//    transactionsSubject.send(transactions)
+    updatePublisher()
+  }
+  
+  private func updatePublisher() {
+    guard
+      let rpc = lastUsedRpc,
+      let filter = lastUsedFilter
+    else {
+      return
+    }
+    
+    switch filter {
+    case .incoming: incomingTransactions(rpcSourceUrl: rpc)
+    case .outgoing: outgoingTransactions(rpcSourceUrl: rpc)
+    default: allTransactions(rpcSourceUrl: rpc)
+    }
+    
   }
   
   func getLastTransaction(rpcSourceUrl: String) -> DerivableCoinTransaction? {
     storage.lastTransaction(
+      rpcSourceUrl: rpcSourceUrl,
+      address: self.userAddress,
+      blockchainUid: self.blockchainId
+    )
+  }
+  
+  func getLastIncomingTransaction(rpcSourceUrl: String) -> DerivableCoinTransaction? {
+    return storage.lastIncomingTransaction(
+      rpcSourceUrl: rpcSourceUrl,
+      address: self.userAddress,
+      blockchainUid: self.blockchainId
+    )
+  }
+  
+  func getLastOutgoingTransaction(rpcSourceUrl: String) -> DerivableCoinTransaction? {
+    return storage.lastOutgoingTransaction(
       rpcSourceUrl: rpcSourceUrl,
       address: self.userAddress,
       blockchainUid: self.blockchainId

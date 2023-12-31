@@ -9,5 +9,4 @@ public enum DerivableConstants {
   
   public static let safeCoinId = 19165
   public static let solanaCoinId = 501
-  public static let suiCoinId = 784
 }

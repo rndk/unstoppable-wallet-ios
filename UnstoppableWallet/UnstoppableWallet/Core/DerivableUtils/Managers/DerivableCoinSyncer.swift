@@ -67,13 +67,11 @@ extension DerivableCoinSyncer {
   }
   
   func sync() {
-    print(">>> DerivableCoinSyncer sync() \(self.blockchainUid) start...")
     Task { [weak self, networkInteractor, address, transactionManager, accountInfoManager, storage, blockchainUid] in
       do {
         guard let syncer = self, !syncer.state.syncing else {
           return
         }
-        print(">>> DerivableCoinSyncer sync() \(self?.blockchainUid) true start...")
         self?.set(state: .syncing(progress: nil))
         
         let balance = try await networkInteractor.getBalance(address: address)
@@ -95,15 +93,12 @@ extension DerivableCoinSyncer {
           address: address,
           lastTransaction: lastTransactionHash
         )
-        print(">>> DerivableCoinSyncer safeTransfers: \(safeTransfers)")
-        print(">>> DerivableCoinSyncer splTransfers: \(splTransfers)")
         
         let safeRpcExportedTxs = (safeTransfers + splTransfers).sorted(by: {$0.blockTime < $1.blockTime })
         
         transactionManager.save(transactions: safeRpcExportedTxs, replaceOnConflict: true)
         
         self?.set(state: .synced)
-        print(">>> DerivableCoinSyncer sync() \(self?.blockchainUid) complete...")
       } catch {
         self?.set(state: .notSynced(error: error))
       }

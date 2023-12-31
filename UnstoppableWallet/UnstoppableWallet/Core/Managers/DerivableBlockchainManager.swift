@@ -8,6 +8,7 @@ class DerivableBlockchainManager {
   private let blockchainTypes: [BlockchainType] = [
     .safeCoin,
     .solana,
+    .sui,
   ]
   
   private let marketKit: MarketKit.Kit
@@ -87,6 +88,26 @@ extension DerivableBlockchainManager {
         blockchainUid: blockchainType.uid,
         name: "DevNet",
         link: "https://api.devnet.solana.com/",
+        createdAt: 0
+      )
+    ]
+    case .sui: return [
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "MainNet",
+        link: "https://fullnode.mainnet.sui.io/",
+        createdAt: 0
+      ),
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "TestNet",
+        link: "https://fullnode.testnet.sui.io/",
+        createdAt: 0
+      ),
+      DerivableRpcSource(
+        blockchainUid: blockchainType.uid,
+        name: "DevNet",
+        link: "https://fullnode.devnet.sui.io/",
         createdAt: 0
       )
     ]

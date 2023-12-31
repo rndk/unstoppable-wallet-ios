@@ -53,7 +53,6 @@ class DerivableCoinKitManager {
       return wrp
     }
     if currentAccount != account {
-      print(">>> clear kit map")
       for kit in kitMap.values {
         kit.coinKit.stop()
       }

@@ -26,7 +26,6 @@ public struct DerivablePreparedTransaction: Equatable {
     //            Logger.log(event: "serializedTransaction", message: serializedTransaction, logLevel: .debug)
     if let decodedTransaction = transaction.jsonString {
       //                Logger.log(event: "decodedTransaction", message: decodedTransaction, logLevel: .debug)
-      print(">>> DerivablePreparedTransaction serialize() decodedTransaction:\(decodedTransaction)")
     }
 #endif
     return serializedTransaction
@@ -37,7 +36,6 @@ public struct DerivablePreparedTransaction: Equatable {
     else {
       //            Logger.log(event: "SolanaSwift: findSignature", message: "Signature not found", logLevel: .error)
       //            throw DerivableVersionedTransactionError.signatureNotFound
-      print(">>> DerivablePreparedTransaction findSignature() error like signature not found?")
       throw DerivableVersionedTransactionError.signatureNotFound
     }
     return Base58.encode(signature.bytes)

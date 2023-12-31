@@ -227,6 +227,7 @@ class App {
         derivableSyncerStorage = DerivableCoinSyncerStorage(dbPool: dbPool)
       
         let derivableCoinKitManager = DerivableCoinKitManager(syncSourceManager: derivableSyncSourceManager)
+        let suiKitManager = SuiKitManager(syncSourceManager: derivableSyncSourceManager)
 
         let adapterFactory = AdapterFactory(
             evmBlockchainManager: evmBlockchainManager,
@@ -237,7 +238,8 @@ class App {
             restoreSettingsManager: restoreSettingsManager,
             coinManager: coinManager,
             evmLabelManager: evmLabelManager,
-            derivableCoinKitManager: derivableCoinKitManager
+            derivableCoinKitManager: derivableCoinKitManager,
+            suiKitManager: suiKitManager
         )
         adapterManager = AdapterManager(
             adapterFactory: adapterFactory,

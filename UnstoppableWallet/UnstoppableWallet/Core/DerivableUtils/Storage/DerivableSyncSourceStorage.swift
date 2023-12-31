@@ -14,7 +14,6 @@ class DerivableSyncSourceStorage {
     var migrator = DatabaseMigrator()
     
     migrator.registerMigration("Create Derivable Rpc Sources") { db in
-      print(">>> DerivableSyncSourceStorage in migrate")
       try db.create(table: DerivableRpcSource.databaseTableName) { t in
         t.column(DerivableRpcSource.Columns.blockchainUid.name, .text).notNull()
         t.column(DerivableRpcSource.Columns.link.name, .text).notNull()

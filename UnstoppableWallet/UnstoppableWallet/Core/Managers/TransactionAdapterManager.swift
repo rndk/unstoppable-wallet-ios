@@ -47,6 +47,8 @@ class TransactionAdapterManager {
           transactionsAdapter = adapterFactory.derivableCoinTransactionAdapter(transactionSource: source)
         } else if source.blockchainType == .solana {
           transactionsAdapter = adapterFactory.derivableCoinTransactionAdapter(transactionSource: source)
+        } else if source.blockchainType == .sui {
+          transactionsAdapter = adapterFactory.suiTransactionAdapter(transactionSource: source)
         } else {
           transactionsAdapter = adapter as? ITransactionsAdapter
         }

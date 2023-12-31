@@ -153,7 +153,6 @@ class SendDerivableCoinViewController: ThemeViewController {
   }
   
   private func openConfirm(sendData: SendDerivableCoinService.SendData) {
-    print(">>> SendSafeCoinViewController openConfirm data: \(sendData.addressData.coinAddress.raw) am:\(sendData.sendAmount)")
     guard let viewController = SendDerivableCoinConfirmationModule.viewController(coinKitWrapper: coinKitWrapper, sendData: sendData) else {
       return
     }
@@ -162,77 +161,77 @@ class SendDerivableCoinViewController: ThemeViewController {
 }
 
 extension SendDerivableCoinViewController: SectionsDataSource {
-
-    func buildSections() -> [SectionProtocol] {
-        var sections = [
-            Section(
-                id: "available-balance",
-                headerState: .margin(height: .margin12),
-                rows: [
-                    StaticRow(
-                        cell: availableBalanceCell,
-                        id: "available-balance",
-                        height: availableBalanceCell.cellHeight
-                    )
-                ]
-            ),
-            Section(
-                id: "amount",
-                headerState: .margin(height: .margin16),
-                rows: [
-                    StaticRow(
-                        cell: amountCell,
-                        id: "amount-input",
-                        height: amountCell.cellHeight
-                    ),
-                    StaticRow(
-                        cell: amountCautionCell,
-                        id: "amount-caution",
-                        dynamicHeight: { [weak self] width in
-                            self?.amountCautionCell.height(containerWidth: width) ?? 0
-                        }
-                    )
-                ]
-            )
+  
+  func buildSections() -> [SectionProtocol] {
+    var sections = [
+      Section(
+        id: "available-balance",
+        headerState: .margin(height: .margin12),
+        rows: [
+          StaticRow(
+            cell: availableBalanceCell,
+            id: "available-balance",
+            height: availableBalanceCell.cellHeight
+          )
         ]
-        if viewModel.showAddress {
-            sections.append(
-                    Section(
-                            id: "recipient",
-                            headerState: .margin(height: .margin16),
-                            rows: [
-                                StaticRow(
-                                        cell: recipientCell,
-                                        id: "recipient-input",
-                                        dynamicHeight: { [weak self] width in
-                                            self?.recipientCell.height(containerWidth: width) ?? 0
-                                        }
-                                ),
-                                StaticRow(
-                                        cell: recipientCautionCell,
-                                        id: "recipient-caution",
-                                        dynamicHeight: { [weak self] width in
-                                            self?.recipientCautionCell.height(containerWidth: width) ?? 0
-                                        }
-                                )
-                            ]
-                    )
+      ),
+      Section(
+        id: "amount",
+        headerState: .margin(height: .margin16),
+        rows: [
+          StaticRow(
+            cell: amountCell,
+            id: "amount-input",
+            height: amountCell.cellHeight
+          ),
+          StaticRow(
+            cell: amountCautionCell,
+            id: "amount-caution",
+            dynamicHeight: { [weak self] width in
+              self?.amountCautionCell.height(containerWidth: width) ?? 0
+            }
+          )
+        ]
+      )
+    ]
+    if viewModel.showAddress {
+      sections.append(
+        Section(
+          id: "recipient",
+          headerState: .margin(height: .margin16),
+          rows: [
+            StaticRow(
+              cell: recipientCell,
+              id: "recipient-input",
+              dynamicHeight: { [weak self] width in
+                self?.recipientCell.height(containerWidth: width) ?? 0
+              }
+            ),
+            StaticRow(
+              cell: recipientCautionCell,
+              id: "recipient-caution",
+              dynamicHeight: { [weak self] width in
+                self?.recipientCautionCell.height(containerWidth: width) ?? 0
+              }
             )
-        }
-        sections.append(
-                Section(
-                        id: "button",
-                        footerState: .margin(height: .margin32),
-                        rows: [
-                            StaticRow(
-                                    cell: buttonCell,
-                                    id: "button",
-                                    height: PrimaryButtonCell.height
-                            )
-                        ]
-                )
+          ]
         )
-        return sections
+      )
     }
-
+    sections.append(
+      Section(
+        id: "button",
+        footerState: .margin(height: .margin32),
+        rows: [
+          StaticRow(
+            cell: buttonCell,
+            id: "button",
+            height: PrimaryButtonCell.height
+          )
+        ]
+      )
+    )
+    return sections
+  }
+  
 }

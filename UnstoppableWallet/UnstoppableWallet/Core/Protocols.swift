@@ -118,6 +118,8 @@ protocol ISendZcashAdapter {
 
 protocol ISendDerivableCoinAdapter { }
 
+protocol ISendSuiAdapter { }
+
 // Nft Adapters
 
 protocol INftAdapter: AnyObject {

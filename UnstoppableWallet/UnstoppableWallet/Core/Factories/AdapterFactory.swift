@@ -14,9 +14,20 @@ class AdapterFactory {
     private let coinManager: CoinManager
     private let evmLabelManager: EvmLabelManager
     private let derivableCoinKitManager: DerivableCoinKitManager
+    private let suiKitManager: SuiKitManager
 
-    init(evmBlockchainManager: EvmBlockchainManager, evmSyncSourceManager: EvmSyncSourceManager, binanceKitManager: BinanceKitManager, btcBlockchainManager: BtcBlockchainManager, tronKitManager: TronKitManager,
-         restoreSettingsManager: RestoreSettingsManager, coinManager: CoinManager, evmLabelManager: EvmLabelManager, derivableCoinKitManager: DerivableCoinKitManager) {
+    init(
+      evmBlockchainManager: EvmBlockchainManager,
+      evmSyncSourceManager: EvmSyncSourceManager,
+      binanceKitManager: BinanceKitManager,
+      btcBlockchainManager: BtcBlockchainManager,
+      tronKitManager: TronKitManager,
+      restoreSettingsManager: RestoreSettingsManager,
+      coinManager: CoinManager,
+      evmLabelManager: EvmLabelManager,
+      derivableCoinKitManager: DerivableCoinKitManager,
+      suiKitManager: SuiKitManager
+    ) {
         self.evmBlockchainManager = evmBlockchainManager
         self.evmSyncSourceManager = evmSyncSourceManager
         self.binanceKitManager = binanceKitManager
@@ -26,6 +37,7 @@ class AdapterFactory {
         self.coinManager = coinManager
         self.evmLabelManager = evmLabelManager
         self.derivableCoinKitManager = derivableCoinKitManager
+        self.suiKitManager = suiKitManager
     }
 
     private func evmAdapter(wallet: Wallet) -> IAdapter? {
@@ -70,8 +82,16 @@ class AdapterFactory {
     }
   
     private func suiAdapter(wallet: Wallet) -> IAdapter? {
-        //TODO
-        return nil
+      guard let suiKitWrapper = try? suiKitManager.coinKit(
+        token: wallet.token,
+        account: wallet.account,
+        blockChainType: .sui,
+        derivableNetwork: SuiNetwork()
+      ) else {
+          return nil
+      }
+      
+      return SuiAdapter(coinKitWrapper: suiKitWrapper)
     }
   
     private func solanaAdapter(wallet: Wallet) -> IAdapter? {
@@ -137,7 +157,15 @@ extension AdapterFactory {
     }
   
     func suiTransactionAdapter(transactionSource: TransactionSource) -> ITransactionsAdapter? {
-      //
+      let query = TokenQuery(blockchainType: transactionSource.blockchainType, tokenType: .native)
+      
+      if let coinKitWrapper = suiKitManager.coinKit(blockchainType: transactionSource.blockchainType), let baseToken = try? coinManager.token(query: query) {
+        return SuiTransactionsAdapter(
+          coinKitWrapper: coinKitWrapper,
+          transactionSource: transactionSource,
+          baseToken: baseToken
+        )
+      }
       return nil
     }
   

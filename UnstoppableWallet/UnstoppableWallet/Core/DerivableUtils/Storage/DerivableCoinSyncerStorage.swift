@@ -22,7 +22,6 @@ public class DerivableCoinSyncerStorage {
     var migrator = DatabaseMigrator()
     
     migrator.registerMigration("createDerivableLastBlockHeight") { db in
-      print(">>> DerivableCoinSyncerStorage register migration")
       try db.create(table: DerivableLastBlockHeight.databaseTableName, body: { t in
         t.column(DerivableLastBlockHeight.Columns.walletAddress.name, .text)
         t.column(DerivableLastBlockHeight.Columns.coinUid.name, .text)

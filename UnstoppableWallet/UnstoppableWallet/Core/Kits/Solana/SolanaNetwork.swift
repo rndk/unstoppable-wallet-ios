@@ -1,5 +1,5 @@
 import Foundation
-//todo urls
+
 class SolanaNetwork: DerivableCoinNetwork {
   var mainNetUrl = "https://api.mainnet-beta.solana.com/"
   var testNetUrl = "https://api.testnet.solana.com/"

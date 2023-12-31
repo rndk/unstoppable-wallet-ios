@@ -497,7 +497,6 @@ public class JSONRPCAPIClient: DerivationApiClient {
       //                message: (String(data: data, encoding: .utf8) ?? "") + "\n" + (error.message ?? ""),
       //                logLevel: .error
       //            )
-      print(">>> JsonRpcApiClient error in get with method: \(method) and params: \(params), error: \(error)")
       throw APIClientError.responseError(error)
     }
     guard let result = response.result else {

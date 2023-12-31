@@ -22,7 +22,8 @@ extension BlockchainType {
         .binanceChain,
         .tron,
         .sui,
-        .safeCoin
+        .safeCoin,
+        .solana
     ]
 
     func placeholderImageName(tokenProtocol: TokenProtocol?) -> String {
@@ -37,6 +38,8 @@ extension BlockchainType {
         let scale = Int(UIScreen.main.scale)
         if case .safeCoin = self {
           return "https://raw.githubusercontent.com/Fair-Exchange/safecoinwiki/master/Logos/SafeCoin/256.png"
+        } else if case .sui = self {
+          return "https://cdn.blocksdecoded.com/coin-icons/32px/\(uid)@\(scale)x.png"
         }
         return "https://cdn.blocksdecoded.com/blockchain-icons/32px/\(uid)@\(scale)x.png"
     }
@@ -54,20 +57,21 @@ extension BlockchainType {
         case .ethereum: return 2
         case .safeCoin: return 3
         case .sui: return 4
-        case .binanceSmartChain: return 5
-        case .tron: return 6
-        case .polygon: return 7
-        case .avalanche: return 8
-        case .zcash: return 9
-        case .bitcoinCash: return 10
-        case .ecash: return 11
-        case .litecoin: return 12
-        case .dash: return 13
-        case .binanceChain: return 14
-        case .gnosis: return 15
-        case .fantom: return 16
-        case .arbitrumOne: return 17
-        case .optimism: return 18
+        case .solana: return 5
+        case .binanceSmartChain: return 6
+        case .tron: return 7
+        case .polygon: return 8
+        case .avalanche: return 9
+        case .zcash: return 10
+        case .bitcoinCash: return 11
+        case .ecash: return 12
+        case .litecoin: return 13
+        case .dash: return 14
+        case .binanceChain: return 15
+        case .gnosis: return 16
+        case .fantom: return 17
+        case .arbitrumOne: return 18
+        case .optimism: return 19
         default: return Int.max
         }
     }
@@ -149,8 +153,8 @@ extension BlockchainType {
         case .litecoin: return "LTC (BIP44, BIP49, BIP84, BIP86)"
         case .binanceChain: return "BNB, BEP2 tokens"
         case .tron: return "TRX, TRC20 tokens"
-        case .sui: return "SUI DESC" //TODO
-        case .safeCoin: return "SAFECOIN DESC" //TODO
+        case .sui: return "SUI"
+        case .safeCoin: return "SAFECOIN"
         default: return ""
         }
     }
