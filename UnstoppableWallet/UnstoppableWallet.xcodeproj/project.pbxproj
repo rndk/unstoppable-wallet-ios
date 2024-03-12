@@ -1705,6 +1705,8 @@
 		229024282B3187FD004A7232 /* DerivableCoinSyncerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229024262B3187FD004A7232 /* DerivableCoinSyncerStorage.swift */; };
 		2290242A2B3189BD004A7232 /* DerivableLastBlockHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229024292B3189BD004A7232 /* DerivableLastBlockHeight.swift */; };
 		2290242B2B3189BD004A7232 /* DerivableLastBlockHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229024292B3189BD004A7232 /* DerivableLastBlockHeight.swift */; };
+		2298E64D2BA077E100EBA037 /* ThemeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2298E64C2BA077E100EBA037 /* ThemeKit */; };
+		2298E64F2BA077EA00EBA037 /* ThemeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2298E64E2BA077EA00EBA037 /* ThemeKit */; };
 		229AE2FF2B2304FC00981000 /* BasicProgram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229AE2FE2B2304FC00981000 /* BasicProgram.swift */; };
 		229AE3002B2304FC00981000 /* BasicProgram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229AE2FE2B2304FC00981000 /* BasicProgram.swift */; };
 		229AE3022B23054B00981000 /* SafeCoinTokenProgram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229AE3012B23054B00981000 /* SafeCoinTokenProgram.swift */; };
@@ -3079,13 +3081,11 @@
 		D3C187B52907A63600FE1900 /* HdWalletKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187B42907A63600FE1900 /* HdWalletKit */; };
 		D3C187BA2907CFAB00FE1900 /* Checkpoints in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187B92907CFAB00FE1900 /* Checkpoints */; };
 		D3C187BC2907CFC200FE1900 /* Checkpoints in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187BB2907CFC200FE1900 /* Checkpoints */; };
-		D3C187CF290FCF2D00FE1900 /* ThemeKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187CE290FCF2D00FE1900 /* ThemeKit */; };
 		D3C187D2290FCF3D00FE1900 /* ComponentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187D1290FCF3D00FE1900 /* ComponentKit */; };
 		D3C187D5290FCF7D00FE1900 /* HUD in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187D4290FCF7D00FE1900 /* HUD */; };
 		D3C187D8290FCF9C00FE1900 /* LanguageKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187D7290FCF9C00FE1900 /* LanguageKit */; };
 		D3C187DB290FCFBC00FE1900 /* SectionsTableView in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187DA290FCFBC00FE1900 /* SectionsTableView */; };
 		D3C187DE290FCFE400FE1900 /* StorageKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187DD290FCFE400FE1900 /* StorageKit */; };
-		D3C187E0290FD00E00FE1900 /* ThemeKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187DF290FD00E00FE1900 /* ThemeKit */; };
 		D3C187E2290FD00E00FE1900 /* ComponentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187E1290FD00E00FE1900 /* ComponentKit */; };
 		D3C187E4290FD00E00FE1900 /* HUD in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187E3290FD00E00FE1900 /* HUD */; };
 		D3C187E6290FD00E00FE1900 /* LanguageKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3C187E5290FD00E00FE1900 /* LanguageKit */; };
@@ -4636,6 +4636,7 @@
 				500F1D1327AA87D1002AA419 /* AlignedCollectionViewFlowLayout in Frameworks */,
 				6BDA29AB29D6F37C003847ED /* ECashKit in Frameworks */,
 				D3604E8C28F03DBF0066C366 /* BitcoinCashKit in Frameworks */,
+				2298E64F2BA077EA00EBA037 /* ThemeKit in Frameworks */,
 				D3993DC428F429AA008720FB /* UnstoppableDomainsResolution in Frameworks */,
 				D3604E9E28F03DC00066C366 /* BinanceChainKit in Frameworks */,
 				2270EDED2B3BF9BC00A093FC /* ed25519swift in Frameworks */,
@@ -4643,7 +4644,6 @@
 				D3C187BC2907CFC200FE1900 /* Checkpoints in Frameworks */,
 				D3AF5A9329FFD87500C1399E /* RxSwift in Frameworks */,
 				D3604E5728F02B280066C366 /* NftKit in Frameworks */,
-				D3C187E0290FD00E00FE1900 /* ThemeKit in Frameworks */,
 				2270EDEF2B3BF9C200A093FC /* Blake2 in Frameworks */,
 				D0DA7413272A6F180072BE86 /* UnicodeURL in Frameworks */,
 				D38405B8218317DF007D50AD /* LocalAuthentication.framework in Frameworks */,
@@ -4703,7 +4703,6 @@
 				6BDA29AD29D6F384003847ED /* ECashKit in Frameworks */,
 				D3604E4D28F02AB40066C366 /* NftKit in Frameworks */,
 				2270EDF32B3BF9E000A093FC /* Blake2 in Frameworks */,
-				D3C187CF290FCF2D00FE1900 /* ThemeKit in Frameworks */,
 				D0DA740F272A6EFC0072BE86 /* UnicodeURL in Frameworks */,
 				D38406A721831B3D007D50AD /* LocalAuthentication.framework in Frameworks */,
 				D3993DBB28F4277E008720FB /* ActionSheet in Frameworks */,
@@ -4711,6 +4710,7 @@
 				D3604E4A28F02A8C0066C366 /* Eip20Kit in Frameworks */,
 				D3C187DE290FCFE400FE1900 /* StorageKit in Frameworks */,
 				D3604E4328F02A020066C366 /* EvmKit in Frameworks */,
+				2298E64D2BA077E100EBA037 /* ThemeKit in Frameworks */,
 				D0EC34DB2A4450B100BB308B /* HCaptcha in Frameworks */,
 				D36E0C2A28D084AB00B622B9 /* CollectionViewCenteredFlowLayout in Frameworks */,
 				D3604E6628F02D9A0066C366 /* BitcoinKit in Frameworks */,
@@ -8928,7 +8928,6 @@
 				D3993DC328F429AA008720FB /* UnstoppableDomainsResolution */,
 				D3C187B42907A63600FE1900 /* HdWalletKit */,
 				D3C187BB2907CFC200FE1900 /* Checkpoints */,
-				D3C187DF290FD00E00FE1900 /* ThemeKit */,
 				D3C187E1290FD00E00FE1900 /* ComponentKit */,
 				D3C187E3290FD00E00FE1900 /* HUD */,
 				D3C187E5290FD00E00FE1900 /* LanguageKit */,
@@ -8948,6 +8947,7 @@
 				224214D42B2C4036001C7FA4 /* Task_retrying */,
 				2270EDEC2B3BF9BC00A093FC /* ed25519swift */,
 				2270EDEE2B3BF9C200A093FC /* Blake2 */,
+				2298E64E2BA077EA00EBA037 /* ThemeKit */,
 			);
 			productName = Wallet;
 			productReference = D38405CE218317DF007D50AD /* Unstoppable D.app */;
@@ -8995,7 +8995,6 @@
 				D3993DC128F42992008720FB /* UnstoppableDomainsResolution */,
 				D3C187B22907A60800FE1900 /* HdWalletKit */,
 				D3C187B92907CFAB00FE1900 /* Checkpoints */,
-				D3C187CE290FCF2D00FE1900 /* ThemeKit */,
 				D3C187D1290FCF3D00FE1900 /* ComponentKit */,
 				D3C187D4290FCF7D00FE1900 /* HUD */,
 				D3C187D7290FCF9C00FE1900 /* LanguageKit */,
@@ -9017,6 +9016,7 @@
 				224214D22B2C402C001C7FA4 /* Task_retrying */,
 				2270EDF02B3BF9CC00A093FC /* ed25519swift */,
 				2270EDF22B3BF9E000A093FC /* Blake2 */,
+				2298E64C2BA077E100EBA037 /* ThemeKit */,
 			);
 			productName = Wallet;
 			productReference = D38406BE21831B3D007D50AD /* Unstoppable.app */;
@@ -9087,7 +9087,6 @@
 				D3993DC028F42992008720FB /* XCRemoteSwiftPackageReference "resolution-swift" */,
 				D3C187B12907A60700FE1900 /* XCRemoteSwiftPackageReference "HdWalletKit" */,
 				D3C187B82907CFAB00FE1900 /* XCRemoteSwiftPackageReference "Checkpoints" */,
-				D3C187CD290FCF2D00FE1900 /* XCRemoteSwiftPackageReference "ThemeKit" */,
 				D3C187D0290FCF3D00FE1900 /* XCRemoteSwiftPackageReference "ComponentKit" */,
 				D3C187D3290FCF7D00FE1900 /* XCRemoteSwiftPackageReference "HUD" */,
 				D3C187D6290FCF9C00FE1900 /* XCRemoteSwiftPackageReference "LanguageKit" */,
@@ -9107,6 +9106,7 @@
 				224214D12B2C3FE8001C7FA4 /* XCRemoteSwiftPackageReference "task-retrying-swift" */,
 				2270EDE72B3BF4D900A093FC /* XCRemoteSwiftPackageReference "ed25519swift" */,
 				2270EDE82B3BF50E00A093FC /* XCRemoteSwiftPackageReference "Blake2.swift" */,
+				2298E64B2BA0777300EBA037 /* XCRemoteSwiftPackageReference "ThemeKit.Swift" */,
 			);
 			productRefGroup = D3285F4320BD158E00644076 /* Products */;
 			projectDirPath = "";
@@ -12451,6 +12451,14 @@
 				version = 0.2.0;
 			};
 		};
+		2298E64B2BA0777300EBA037 /* XCRemoteSwiftPackageReference "ThemeKit.Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rndk/ThemeKit.Swift.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		229EFEA42AFB587B005B0273 /* XCRemoteSwiftPackageReference "MarketKit.Swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/rndk/MarketKit.Swift.git";
@@ -12747,14 +12755,6 @@
 				version = 1.0.14;
 			};
 		};
-		D3C187CD290FCF2D00FE1900 /* XCRemoteSwiftPackageReference "ThemeKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/horizontalsystems/ThemeKit.Swift";
-			requirement = {
-				kind = exactVersion;
-				version = 2.0.2;
-			};
-		};
 		D3C187D0290FCF3D00FE1900 /* XCRemoteSwiftPackageReference "ComponentKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/horizontalsystems/ComponentKit.Swift";
@@ -12843,6 +12843,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2270EDE82B3BF50E00A093FC /* XCRemoteSwiftPackageReference "Blake2.swift" */;
 			productName = Blake2;
+		};
+		2298E64C2BA077E100EBA037 /* ThemeKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2298E64B2BA0777300EBA037 /* XCRemoteSwiftPackageReference "ThemeKit.Swift" */;
+			productName = ThemeKit;
+		};
+		2298E64E2BA077EA00EBA037 /* ThemeKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2298E64B2BA0777300EBA037 /* XCRemoteSwiftPackageReference "ThemeKit.Swift" */;
+			productName = ThemeKit;
 		};
 		229EFEA52AFB589D005B0273 /* MarketKit */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -13229,11 +13239,6 @@
 			package = D3C187B82907CFAB00FE1900 /* XCRemoteSwiftPackageReference "Checkpoints" */;
 			productName = Checkpoints;
 		};
-		D3C187CE290FCF2D00FE1900 /* ThemeKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3C187CD290FCF2D00FE1900 /* XCRemoteSwiftPackageReference "ThemeKit" */;
-			productName = ThemeKit;
-		};
 		D3C187D1290FCF3D00FE1900 /* ComponentKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D3C187D0290FCF3D00FE1900 /* XCRemoteSwiftPackageReference "ComponentKit" */;
@@ -13258,11 +13263,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D3C187DC290FCFE400FE1900 /* XCRemoteSwiftPackageReference "StorageKit" */;
 			productName = StorageKit;
-		};
-		D3C187DF290FD00E00FE1900 /* ThemeKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3C187CD290FCF2D00FE1900 /* XCRemoteSwiftPackageReference "ThemeKit" */;
-			productName = ThemeKit;
 		};
 		D3C187E1290FD00E00FE1900 /* ComponentKit */ = {
 			isa = XCSwiftPackageProductDependency;
