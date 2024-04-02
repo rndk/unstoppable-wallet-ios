@@ -85,7 +85,6 @@ struct SuiTxDataTransaction: Codable {
 }
 
 struct SuiTxInput: Codable {
-  let value: String?
   let valueType: String?
   let type: String?
 }
